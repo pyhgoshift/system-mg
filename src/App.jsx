@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { CheckCircle2, Globe, Lock, ExternalLink, PartyPopper, Sparkles, Wifi, WifiOff, Radio } from 'lucide-react';
+import { CheckCircle2, Globe, Lock, ExternalLink, PartyPopper, Sparkles, Wifi, WifiOff, Radio, Server, Cloud, ArrowRight } from 'lucide-react';
 
 // ============================
 // 설정
@@ -101,6 +101,7 @@ export default function Dashboard() {
   const dnsReady = dnsTask && dnsTask.status === 'done';
   const urlTasks = tasks.filter(t => t.isUrlCheck).sort((a, b) => Number(a.id) - Number(b.id));
   const flowingTasks = tasks.filter(t => t.status === 'progress');
+  const doneTasks = tasks.filter(t => t.status === 'done');
 
   const handleUrlClick = (id) => {
     if (!dnsReady || verifiedUrls.has(id) || verifyingId) return;
@@ -200,18 +201,61 @@ function StatMini({ label, value, color }) {
 }
 
 function DataMigrationVisual({ tasks, flowingTasks, tick }) {
+  const doneCount = tasks.filter(t => t.status === 'done').length;
+  const totalCount = tasks.length;
+  
   return (
     <div className="relative h-[480px]">
-      <svg className="absolute inset-0 w-full h-full opacity-40" viewBox="0 0 1200 480">
-        {Array.from({ length: 20 }).map((_, i) => {
-          const y = 40 + i * 22;
-          return (
-            <path key={i} d={`M 250,${y} C 500,${y} 700,240 950,240`} stroke="#22D3EE" strokeWidth="1" fill="none" opacity="0.1" />
-          );
-        })}
-      </svg>
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 flex flex-col items-center z-10">
+        <div className="relative w-full h-32 flex items-center justify-between px-6">
+          {/* 발신지 서버 */}
+          <div className="flex flex-col items-center gap-2">
+            <div className="w-16 h-16 rounded-2xl bg-slate-800 border border-slate-700 flex items-center justify-center shadow-2xl relative overflow-hidden">
+              <Server className="w-8 h-8 text-slate-400" />
+              <div className="absolute top-0 left-0 w-full h-1 bg-slate-700" />
+            </div>
+            <span className="text-[10px] font-black text-slate-500 tracking-widest uppercase">AS-IS Server</span>
+          </div>
 
-      {/* 태스크 박스 최상단 밀착 (top-2) */}
+          {/* 연결 경로 & 이동 입자 */}
+          <div className="flex-1 h-px bg-gradient-to-r from-slate-700 via-emerald-500 to-cyan-400 relative mx-4">
+            <ArrowRight className="absolute -right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-cyan-400 opacity-30" />
+            {[0, 1, 2, 3].map(i => (
+              <div key={i} className="absolute top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_15px_#22D3EE]"
+                style={{
+                  left: `${((tick * 3 + i * 25) % 100)}%`,
+                  opacity: 1 - Math.abs(0.5 - ((tick * 3 + i * 25) % 100) / 100) * 2,
+                  transform: `translateY(-50%) scale(${1 + Math.sin(tick * 0.1 + i) * 0.2})`
+                }}
+              />
+            ))}
+          </div>
+
+          {/* 목적지 클라우드 */}
+          <div className="flex flex-col items-center gap-2">
+            <div className="w-20 h-20 rounded-3xl bg-cyan-500/10 border-2 border-cyan-500/50 flex items-center justify-center shadow-[0_0_40px_rgba(34,211,238,0.2)] relative">
+              <Cloud className="w-10 h-10 text-cyan-400 animate-pulse" />
+              <div className="absolute -top-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full border-2 border-[#0A0E27] animate-ping" />
+            </div>
+            <span className="text-[10px] font-black text-cyan-400 tracking-widest uppercase">TO-BE Cloud</span>
+          </div>
+        </div>
+
+        {/* 실시간 동기화 상태 */}
+        <div className="mt-14 px-8 py-4 rounded-[2rem] backdrop-blur-2xl border border-white/10 bg-white/5 text-center shadow-2xl">
+          <div className="text-[11px] tracking-[0.5em] text-cyan-300/60 mb-2 font-black uppercase">Data Migration Active</div>
+          <div className="flex items-center justify-center gap-3">
+            <div className="text-4xl font-black text-cyan-400 tabular-nums leading-none">{flowingTasks.length}</div>
+            <div className="h-8 w-px bg-white/10" />
+            <div className="text-left">
+              <div className="text-[9px] text-white/30 font-bold uppercase">Syncing Now</div>
+              <div className="text-xs font-black text-white/80">{Math.round((doneTasks.length / tasks.length) * 100)}% Total</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* 태스크 박스 사이드 배치 (이미 적용됨) */}
       <div className="absolute left-2 top-2 bottom-2 w-[430px] grid grid-cols-3 gap-1 content-start overflow-y-auto no-scrollbar z-20">
         {tasks.map((t, i) => <ServerNode key={'asis-'+t.id} task={t} mode="asis" index={i} />)}
       </div>
