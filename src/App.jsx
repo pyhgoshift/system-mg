@@ -251,7 +251,7 @@ function DataMigrationVisual({ tasks, flowingTasks, tick }) {
         {/* 플로팅 태스크 - 동적 좌표 적용 */}
         <div className="absolute inset-0 max-w-[1600px] mx-auto">
           {flowingTasks.slice(0, 4).map((t, i) => (
-            <FloatingTaskLabel key={t.id} task={t} index={i} tick={tick} labelX={labelX} />
+            <FloatingTaskLabel key={t.id} task={t} index={i} tick={tick} labelX={labelX} isMobile={isMobile} />
           ))}
         </div>
       </div>
@@ -290,16 +290,23 @@ function NeonPhoton({ i, pIdx, tick, endX }) {
   );
 }
 
-function FloatingTaskLabel({ task, index, tick, labelX }) {
+function FloatingTaskLabel({ task, index, tick, labelX, isMobile }) {
   const yBase = 240 + (index % 3 - 1) * 120; 
   // 디바이스별 labelX에 맞춰 동적 재배치
   const x = labelX + (Math.sin(tick * 0.02 + index) * 40); 
   const y = yBase + (Math.cos(tick * 0.02 + index) * 30); 
   return (
-    <div className="absolute px-3 md:px-6 py-1 md:py-2 rounded-full border-2 border-emerald-400/80 bg-black/95 backdrop-blur-3xl shadow-[0_0_50px_rgba(52,211,153,0.6)] flex items-center gap-2 md:gap-4 transition-all duration-1000 z-50 whitespace-nowrap scale-75 md:scale-100"
-      style={{ left: x, top: y, transform: 'translate(-50%, -50%)' }}>
-      <div className="w-2 md:h-3 md:w-3 h-2 rounded-full bg-emerald-400 shadow-[0_0_15px_#34D399] animate-pulse" />
-      <span className="text-[10px] md:text-xs font-black text-white uppercase tracking-[0.1em] md:tracking-[0.2em]">작업: {task.id}</span>
+    <div className="absolute px-3 md:px-6 py-1 md:py-2 rounded-full border-2 border-emerald-400/80 bg-black/95 backdrop-blur-3xl shadow-[0_0_50px_rgba(52,211,153,0.6)] flex items-center gap-2 md:gap-4 transition-all duration-1000 z-50 whitespace-nowrap origin-center"
+      style={{ 
+        left: `${(x / 1600) * 100}%`, 
+        top: `${(y / 480) * 100}%`,
+        transform: `translate(-50%, -50%) scale(${isMobile ? 0.6 : 1})`
+      }}>
+      <div className="w-2 h-2 md:w-3 md:h-3 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_15px_rgba(52,211,153,1)]" />
+      <div className="flex flex-col">
+        <span className="text-[8px] md:text-xs font-black text-emerald-400/70 tracking-tighter uppercase leading-none mb-0.5 md:mb-1">Migration Task</span>
+        <span className="text-sm md:text-xl font-black text-white tracking-tighter drop-shadow-md leading-none">#{task.id}</span>
+      </div>
     </div>
   );
 }
