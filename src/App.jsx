@@ -123,7 +123,7 @@ export default function Dashboard() {
         <BinaryRain />
         <Header now={now} stats={stats} connStatus={connStatus} lastSync={lastSync} />
 
-      <div className="absolute top-16 md:top-22 left-2 md:left-8 z-30 block">
+      <div className="absolute top-4 md:top-22 left-2 md:left-8 z-30 block">
         <div className="px-3 md:px-12 py-0.5 md:py-1 rounded-full backdrop-blur-md bg-slate-800/40 border border-slate-700/50">
           <div className="flex items-baseline gap-1 md:gap-3">
             <div className="text-xs md:text-xl font-black text-slate-300">기존환경</div>
@@ -131,7 +131,7 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
-      <div className="absolute top-16 md:top-22 right-2 md:right-8 z-30 block">
+      <div className="absolute top-4 md:top-22 right-2 md:right-8 z-30 block">
         <div className="px-3 md:px-12 py-0.5 md:py-1 rounded-full backdrop-blur-md bg-emerald-500/10 border border-emerald-500/30">
           <div className="flex items-baseline gap-1 md:gap-3">
             <div className="text-xs md:text-xl font-black text-emerald-400">신규환경</div>
@@ -161,7 +161,7 @@ export default function Dashboard() {
 function Header({ now, stats, connStatus, lastSync }) {
   const time = now.toLocaleTimeString('ko-KR', { hour12: false });
   return (
-    <header className="relative pt-4 pb-2 px-4 md:px-10 text-center z-40">
+    <header className="relative pt-16 md:pt-4 pb-2 px-4 md:px-10 text-center z-40">
       <div className="flex flex-wrap items-center justify-center gap-2 md:gap-4 mb-2 text-[10px] md:text-sm">
         <div className="px-2 py-0.5 rounded bg-white/10 text-[8px] md:text-[10px] font-black tracking-tighter">v2.5</div>
         <div className="w-2 h-2 md:w-3 md:h-3 rounded-full bg-rose-500 animate-pulse shadow-[0_0_15px_rgba(244,63,94,0.8)]" />
