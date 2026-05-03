@@ -123,7 +123,7 @@ export default function Dashboard() {
         <BinaryRain />
         <Header now={now} stats={stats} connStatus={connStatus} lastSync={lastSync} />
 
-      <div className="absolute top-4 md:top-22 left-2 md:left-8 z-30 block">
+      <div className="absolute top-[170px] md:top-22 left-2 md:left-8 z-30 block">
         <div className="px-3 md:px-12 py-0.5 md:py-1 rounded-full backdrop-blur-md bg-slate-800/40 border border-slate-700/50">
           <div className="flex items-baseline gap-1 md:gap-3">
             <div className="text-xs md:text-xl font-black text-slate-300">기존환경</div>
@@ -131,7 +131,7 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
-      <div className="absolute top-4 md:top-22 right-2 md:right-8 z-30 block">
+      <div className="absolute top-[170px] md:top-22 right-2 md:right-8 z-30 block">
         <div className="px-3 md:px-12 py-0.5 md:py-1 rounded-full backdrop-blur-md bg-emerald-500/10 border border-emerald-500/30">
           <div className="flex items-baseline gap-1 md:gap-3">
             <div className="text-xs md:text-xl font-black text-emerald-400">신규환경</div>
@@ -161,7 +161,7 @@ export default function Dashboard() {
 function Header({ now, stats, connStatus, lastSync }) {
   const time = now.toLocaleTimeString('ko-KR', { hour12: false });
   return (
-    <header className="relative pt-16 md:pt-4 pb-2 px-4 md:px-10 text-center z-40">
+    <header className="relative pt-6 md:pt-4 pb-2 px-4 md:px-10 text-center z-40">
       <div className="flex flex-wrap items-center justify-center gap-2 md:gap-4 mb-2 text-[10px] md:text-sm">
         <div className="px-2 py-0.5 rounded bg-white/10 text-[8px] md:text-[10px] font-black tracking-tighter">v2.5</div>
         <div className="w-2 h-2 md:w-3 md:h-3 rounded-full bg-rose-500 animate-pulse shadow-[0_0_15px_rgba(244,63,94,0.8)]" />
@@ -171,13 +171,11 @@ function Header({ now, stats, connStatus, lastSync }) {
         <span className="hidden md:inline text-white/30">·</span>
         <span className="font-black uppercase text-[10px] md:text-xs tracking-widest" style={{ color: connStatus === 'connected' ? '#34D399' : '#FBBF24' }}>{connStatus}</span>
       </div>
-      <h1 className="text-xl md:text-4xl font-black tracking-tight mb-4 px-4" style={{
-        background: 'linear-gradient(90deg, #A78BFA, #22D3EE, #34D399)',
-        backgroundSize: '200% auto',
-        WebkitBackgroundClip: 'text',
-        WebkitTextFillColor: 'transparent',
-        animation: 'titleShine 8s linear infinite'
-      }}>경기도교육청 중앙도서관 이전 통합 모니터링</h1>
+      <h1 className="text-sm md:text-3xl font-black tracking-[0.1em] md:tracking-[0.4em] text-transparent bg-clip-text bg-gradient-to-r from-slate-200 via-white to-slate-200 drop-shadow-[0_0_30px_rgba(255,255,255,0.3)] mb-2 md:mb-6" style={{
+        fontFamily: '"Pretendard", sans-serif'
+      }}>
+        경기도교육청 중앙도서관 <br className="md:hidden" /> 이전 통합 모니터링
+      </h1>
       
       <div className="flex items-center justify-center gap-4 md:gap-12 scale-90 md:scale-100">
         <div className="flex items-center gap-2 md:gap-4">
