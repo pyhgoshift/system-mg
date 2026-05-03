@@ -350,8 +350,8 @@ function DataMigrationVisual({ tasks, flowingTasks, tick }) {
           
           const colors = ['#22D3EE', '#A78BFA', '#34D399', '#FF5E9F', '#3B82F6'];
           const color = colors[i % colors.length];
-          const duration = 4; // 느리고 일정한 속도
-          const delay = (i / 24) * -4; // 골고루 퍼지도록 간격 조절
+          const duration = 12; // 훨씬 더 느리고 일정한 속도 (기존 4s -> 12s)
+          const delay = (i / 24) * -duration; // 골고루 퍼지도록 간격 조절
 
           return (
             <g key={i}>
