@@ -337,7 +337,7 @@ function CapsuleGauges({ tasks }) {
             <div key={key} className="p-8 rounded-[3rem] bg-white/5 border border-white/10 text-center backdrop-blur-2xl">
               <div className="flex flex-col gap-2 mb-6">
                 <span className="text-xl font-black uppercase tracking-widest" style={{ color: g.color }}>{g.label}</span>
-                <span className="text-7xl font-black tabular-nums" style={{ color: g.color }}>{d.pct}%</span>
+                <span className="text-3xl font-black tabular-nums" style={{ color: g.color }}>{d.pct}%</span>
               </div>
               <div className="h-14 rounded-full bg-black/50 border border-white/10 overflow-hidden p-2">
                 <div className="h-full rounded-full transition-all duration-1000" style={{
