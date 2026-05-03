@@ -201,7 +201,7 @@ function StatMini({ label, value, color }) {
 }
 
 function DataMigrationVisual({ tasks, flowingTasks, tick }) {
-  const doneCount = tasks.filter(t => t.status === 'done').length;
+  const doneTasks = tasks.filter(t => t.status === 'done');
   const totalCount = tasks.length;
   
   return (
