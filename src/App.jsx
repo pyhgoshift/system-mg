@@ -115,12 +115,13 @@ export default function Dashboard() {
   }, [verifiedUrls, celebrating, urlTasks.length]);
 
   return (
-    <div className="min-h-screen w-full overflow-hidden text-white relative" style={{
-      background: 'linear-gradient(180deg, #0A0E27 0%, #050818 100%)',
-      fontFamily: '"Pretendard", "Noto Sans KR", sans-serif'
-    }}>
-      <BinaryRain />
-      <Header now={now} stats={stats} connStatus={connStatus} lastSync={lastSync} />
+    <div className="min-h-screen w-full bg-[#020617] flex justify-center items-start overflow-x-hidden">
+      <div className="w-full max-w-[1920px] min-h-screen overflow-hidden text-white relative shadow-2xl" style={{
+        background: 'linear-gradient(180deg, #0A0E27 0%, #050818 100%)',
+        fontFamily: '"Pretendard", "Noto Sans KR", sans-serif'
+      }}>
+        <BinaryRain />
+        <Header now={now} stats={stats} connStatus={connStatus} lastSync={lastSync} />
 
       <div className="absolute top-22 left-8 z-30 hidden xl:block">
         <div className="px-12 py-1 rounded-full backdrop-blur-md bg-slate-800/40 border border-slate-700/50">
@@ -152,6 +153,7 @@ export default function Dashboard() {
 
       {celebrating && <CelebrationOverlay onClose={() => setCelebrating(false)} />}
       <Styles />
+      </div>
     </div>
   );
 }
@@ -204,11 +206,11 @@ function StatMini({ label, value, color, size = "text-2xl" }) {
 
 function DataMigrationVisual({ tasks, flowingTasks, tick }) {
   return (
-    <div className="relative h-[300px] md:h-[480px]">
+    <div className="relative h-[240px] md:h-[480px] w-full overflow-hidden">
       {/* 미래형 네온 비주얼 배경 */}
-      <div className="absolute inset-0 z-10 overflow-hidden pointer-events-none">
-        <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, rgba(34,211,238,0.2) 1px, transparent 0)', backgroundSize: '40px 40px' }} />
-        <svg className="absolute inset-0 w-full h-full" viewBox="0 0 1200 480" preserveAspectRatio="xMidYMid slice">
+      <div className="absolute inset-0 z-10 pointer-events-none">
+        <svg className="w-full h-full" viewBox="0 0 1200 480" preserveAspectRatio="xMidYMin meet">
+
           <defs>
             <linearGradient id="neonGrad" x1="0%" y1="0%" x2="100%" y2="0%">
               <stop offset="0%" stopColor="#A78BFA" stopOpacity="0" />
