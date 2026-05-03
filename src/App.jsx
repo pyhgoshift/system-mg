@@ -212,6 +212,9 @@ function DataMigrationVisual({ tasks, flowingTasks, tick }) {
               <stop offset="40%" stopColor="#22D3EE" stopOpacity="0.4" />
               <stop offset="100%" stopColor="#34D399" stopOpacity="0.9" />
             </linearGradient>
+            <marker id="arrow" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#34D399" />
+            </marker>
           </defs>
           {Array.from({ length: 60 }).map((_, i) => {
             const yStart = 20 + i * 8;
@@ -219,7 +222,7 @@ function DataMigrationVisual({ tasks, flowingTasks, tick }) {
             const path = `M 200,${yStart} C 500,${yStart} 750,${yEnd} 1000,${yEnd}`;
             return (
               <React.Fragment key={i}>
-                <path d={path} stroke="url(#neonGrad)" strokeWidth={0.3 + (i % 3) * 0.5} fill="none" opacity={0.1 + (i % 5) * 0.05} />
+                <path d={path} stroke="url(#neonGrad)" strokeWidth={0.3 + (i % 3) * 0.5} fill="none" opacity={0.1 + (i % 5) * 0.05} markerEnd="url(#arrow)" />
                 <NeonPhoton key={`p1-${i}`} path={path} i={i} pIdx={0} tick={tick} />
                 <NeonPhoton key={`p2-${i}`} path={path} i={i} pIdx={1} tick={tick} />
               </React.Fragment>
