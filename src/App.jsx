@@ -171,6 +171,36 @@ export default function Dashboard() {
       <BinaryRain />
       <Header now={now} stats={stats} connStatus={connStatus} lastSync={lastSync} />
 
+      {/* AS-IS/TO-BE 최상단 라벨 (경기도교육청 타이틀 라인 정렬) */}
+      <div className="absolute top-22 left-8 z-30 hidden xl:block">
+        <div className="px-12 py-1 rounded-full backdrop-blur-md" style={{
+          background: 'linear-gradient(135deg, rgba(100,116,139,0.3) 0%, rgba(30,41,59,0.5) 100%)',
+          border: '1px solid rgba(148,163,184,0.3)',
+          boxShadow: '0 0 20px rgba(100,116,139,0.2)'
+        }}>
+          <div className="flex items-baseline gap-3">
+            <div className="text-xl font-black tracking-tighter text-slate-300">AS-IS</div>
+            <div className="text-[10px] tracking-widest text-slate-400 font-bold">기존환경</div>
+          </div>
+        </div>
+      </div>
+      <div className="absolute top-22 right-8 z-30 hidden xl:block">
+        <div className="px-12 py-1 rounded-full backdrop-blur-md" style={{
+          background: 'linear-gradient(135deg, rgba(34,211,238,0.2) 0%, rgba(167,139,250,0.2) 100%)',
+          border: '1px solid rgba(52,211,153,0.4)',
+          boxShadow: '0 0 30px rgba(52,211,153,0.3)'
+        }}>
+          <div className="flex items-baseline gap-3">
+            <div className="text-xl font-black tracking-tighter" style={{
+              background: 'linear-gradient(90deg, #34D399, #22D3EE)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent'
+            }}>TO-BE</div>
+            <div className="text-[10px] tracking-widest text-emerald-300 font-bold">신규환경</div>
+          </div>
+        </div>
+      </div>
+
       <main className="relative px-6 pb-4">
         <DataMigrationVisual tasks={tasks} flowingTasks={flowingTasks} tick={tick} />
         <CapsuleGauges tasks={tasks} />
@@ -363,36 +393,6 @@ function DataMigrationVisual({ tasks, flowingTasks, tick }) {
           );
         })}
       </svg>
-
-      {/* AS-IS/TO-BE 최상단 라벨 (가로 2배, 세로 축소, 타이틀 라인 정렬) */}
-      <div className="absolute top-10 left-8 z-30">
-        <div className="px-12 py-1 rounded-full backdrop-blur-md" style={{
-          background: 'linear-gradient(135deg, rgba(100,116,139,0.3) 0%, rgba(30,41,59,0.5) 100%)',
-          border: '1px solid rgba(148,163,184,0.3)',
-          boxShadow: '0 0 20px rgba(100,116,139,0.2)'
-        }}>
-          <div className="flex items-baseline gap-3">
-            <div className="text-xl font-black tracking-tighter text-slate-300">AS-IS</div>
-            <div className="text-[10px] tracking-widest text-slate-400 font-bold">기존환경</div>
-          </div>
-        </div>
-      </div>
-      <div className="absolute top-10 right-8 z-30">
-        <div className="px-12 py-1 rounded-full backdrop-blur-md" style={{
-          background: 'linear-gradient(135deg, rgba(34,211,238,0.2) 0%, rgba(167,139,250,0.2) 100%)',
-          border: '1px solid rgba(52,211,153,0.4)',
-          boxShadow: '0 0 30px rgba(52,211,153,0.3)'
-        }}>
-          <div className="flex items-baseline gap-3">
-            <div className="text-xl font-black tracking-tighter" style={{
-              background: 'linear-gradient(90deg, #34D399, #22D3EE)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent'
-            }}>TO-BE</div>
-            <div className="text-[10px] tracking-widest text-emerald-300 font-bold">신규환경</div>
-          </div>
-        </div>
-      </div>
 
       {/* AS-IS 좌측: 모든 태스크 (3열 배치, 스크롤바 숨김) */}
       <div className="absolute left-2 top-28 bottom-2 w-[400px] grid grid-cols-3 gap-1.5 content-start overflow-y-auto pr-1 no-scrollbar">
