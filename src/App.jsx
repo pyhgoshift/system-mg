@@ -277,10 +277,10 @@ function NeonPhoton({ path, i, pIdx, tick }) {
 }
 
 function FloatingTaskLabel({ task, index, tick }) {
-  const x = 600 + (Math.sin(tick * 0.03 + index) * 80); // 가로 중앙 집중형 유영
-  const y = 240 + (Math.cos(tick * 0.03 + index) * 40); // 세로 중앙 집중형 유영
+  const x = 900 + (Math.sin(tick * 0.03 + index) * 60); // 오른쪽(TO-BE) 영역으로 2배 이동
+  const y = 240 + (Math.cos(tick * 0.03 + index) * 40); 
   return (
-    <div className="absolute px-6 py-2 rounded-full border-2 border-cyan-400/70 bg-black/90 backdrop-blur-3xl shadow-[0_0_40px_rgba(34,211,238,0.5)] flex items-center gap-4 transition-all duration-1000 z-50"
+    <div className="absolute px-6 py-2 rounded-full border-2 border-cyan-400/80 bg-black/95 backdrop-blur-3xl shadow-[0_0_45px_rgba(34,211,238,0.6)] flex items-center gap-4 transition-all duration-1000 z-50"
       style={{ left: x, top: y, transform: 'translate(-50%, -50%)' }}>
       <div className="w-3 h-3 rounded-full bg-cyan-400 shadow-[0_0_15px_#22D3EE] animate-pulse" />
       <span className="text-xs font-black text-white uppercase tracking-[0.2em]">작업번호: {task.id}</span>
