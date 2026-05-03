@@ -222,8 +222,8 @@ function DataMigrationVisual({ tasks, flowingTasks, tick }) {
             const path = `M 200,${yStart} C 900,${yStart} 300,${yEnd} 1000,${yEnd}`;
             return (
               <React.Fragment key={i}>
-                {/* 배경 라인 강조: 두께와 투명도 상향 */}
-                <path d={path} stroke="url(#neonGrad)" strokeWidth={1 + (i % 3)} fill="none" opacity={0.1 + (i % 5) * 0.05} markerEnd="url(#arrow)" style={{ filter: 'drop-shadow(0 0 15px rgba(52,211,153,0.5))' }} />
+                {/* 배경 라인 5배 초강력 강조: 두께, 투명도, 글로우 대폭 상향 */}
+                <path d={path} stroke="url(#neonGrad)" strokeWidth={2.5 + (i % 3) * 1.5} fill="none" opacity={0.3 + (i % 5) * 0.1} markerEnd="url(#arrow)" style={{ filter: 'drop-shadow(0 0 35px rgba(52,211,153,0.8))' }} />
                 <NeonPhoton key={`p1-${i}`} i={i} pIdx={0} tick={tick} />
                 <NeonPhoton key={`p2-${i}`} i={i} pIdx={1} tick={tick} />
                 <NeonPhoton key={`p3-${i}`} i={i} pIdx={2} tick={tick} />
@@ -261,17 +261,22 @@ function DataMigrationVisual({ tasks, flowingTasks, tick }) {
 }
 
 function NeonPhoton({ i, pIdx, tick }) {
-  const progress = ((tick * (1.2 + i * 0.02) + pIdx * 33) % 100) / 100;
+  const progress = ((tick * (0.9 + i * 0.03) + pIdx * 33) % 100) / 100;
   const x = 200 + (1000 - 200) * progress;
-  // 빛광원을 일직선 띠처럼 흐르게 조정 (Y축 고정)
-  const y = 20 + i * 8; 
+  const t = progress;
+  const yStart = 20 + i * 8;
+  const yEnd = 240 + (i - 30) * 4.5;
+  
+  // 광원띠가 화살표 라인(S-곡선)을 완벽히 따라 흐르도록 복구
+  const cp1y = yStart;
+  const cp2y = yEnd;
+  const y = Math.pow(1-t, 3)*yStart + 3*Math.pow(1-t, 2)*t*cp1y + 3*(1-t)*Math.pow(t, 2)*cp2y + Math.pow(t, 3)*yEnd;
 
-  // 점진적 블룸 효과 유지
-  const intensity = Math.pow(progress, 4) * 2.0 + 0.05;
+  const intensity = Math.pow(progress, 5) * 3.5 + 0.05;
 
   return (
-    <circle cx={x} cy={y} r={1.5 + intensity * 3} fill={i % 2 === 0 ? '#A78BFA' : '#22D3EE'} style={{
-      filter: `drop-shadow(0 0 ${intensity * 30}px ${i % 2 === 0 ? '#A78BFA' : '#22D3EE'})`,
+    <circle cx={x} cy={y} r={2 + intensity * 5} fill={i % 2 === 0 ? '#A78BFA' : '#22D3EE'} style={{
+      filter: `drop-shadow(0 0 ${intensity * 45}px ${i % 2 === 0 ? '#A78BFA' : '#22D3EE'})`,
       opacity: intensity
     }} />
   );
