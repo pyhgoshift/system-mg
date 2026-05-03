@@ -8,7 +8,16 @@
   }
 }
 
-/* Custom Thin Scrollbar */
+/* Hide Scrollbar */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+/* Custom Thin Scrollbar (if needed elsewhere) */
 .custom-scrollbar::-webkit-scrollbar {
   width: 4px;
 }
@@ -18,7 +27,4 @@
 .custom-scrollbar::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.1);
   border-radius: 10px;
-}
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.2);
 }

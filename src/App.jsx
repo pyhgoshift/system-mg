@@ -364,41 +364,45 @@ function DataMigrationVisual({ tasks, flowingTasks, tick }) {
         })}
       </svg>
 
-      {/* AS-IS/TO-BE 최상단 라벨 */}
-      <div className="absolute top-4 left-4 z-30">
-        <div className="px-5 py-2 rounded-lg backdrop-blur-md" style={{
+      {/* AS-IS/TO-BE 최상단 라벨 (가로 2배, 세로 축소, 타이틀 라인 정렬) */}
+      <div className="absolute top-10 left-8 z-30">
+        <div className="px-12 py-1 rounded-full backdrop-blur-md" style={{
           background: 'linear-gradient(135deg, rgba(100,116,139,0.3) 0%, rgba(30,41,59,0.5) 100%)',
           border: '1px solid rgba(148,163,184,0.3)',
           boxShadow: '0 0 20px rgba(100,116,139,0.2)'
         }}>
-          <div className="text-2xl font-black tracking-tight text-slate-300">AS-IS</div>
-          <div className="text-[10px] tracking-widest text-slate-400">기존 환경</div>
+          <div className="flex items-baseline gap-3">
+            <div className="text-xl font-black tracking-tighter text-slate-300">AS-IS</div>
+            <div className="text-[9px] tracking-widest text-slate-400 uppercase opacity-70">Legacy</div>
+          </div>
         </div>
       </div>
-      <div className="absolute top-4 right-4 z-30">
-        <div className="px-5 py-2 rounded-lg backdrop-blur-md" style={{
+      <div className="absolute top-10 right-8 z-30">
+        <div className="px-12 py-1 rounded-full backdrop-blur-md" style={{
           background: 'linear-gradient(135deg, rgba(34,211,238,0.2) 0%, rgba(167,139,250,0.2) 100%)',
           border: '1px solid rgba(52,211,153,0.4)',
           boxShadow: '0 0 30px rgba(52,211,153,0.3)'
         }}>
-          <div className="text-2xl font-black tracking-tight" style={{
-            background: 'linear-gradient(90deg, #34D399, #22D3EE)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent'
-          }}>TO-BE</div>
-          <div className="text-[10px] tracking-widest text-emerald-300">신규 환경</div>
+          <div className="flex items-baseline gap-3">
+            <div className="text-xl font-black tracking-tighter" style={{
+              background: 'linear-gradient(90deg, #34D399, #22D3EE)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent'
+            }}>TO-BE</div>
+            <div className="text-[9px] tracking-widest text-emerald-300 uppercase opacity-70">Target</div>
+          </div>
         </div>
       </div>
 
-      {/* AS-IS 좌측: 모든 태스크 (3열 배치, 라벨 아래로 조정) */}
-      <div className="absolute left-2 top-24 bottom-2 w-[360px] grid grid-cols-3 gap-1.5 content-start overflow-y-auto pr-1 custom-scrollbar">
+      {/* AS-IS 좌측: 모든 태스크 (3열 배치, 스크롤바 숨김) */}
+      <div className="absolute left-2 top-28 bottom-2 w-[400px] grid grid-cols-3 gap-1.5 content-start overflow-y-auto pr-1 no-scrollbar">
         {allTasks.map((task, i) => (
           <ServerNode key={'asis-' + task.id} task={task} mode="asis" index={i} />
         ))}
       </div>
 
-      {/* TO-BE 우측: 모든 태스크 (3열 배치, 라벨 아래로 조정) */}
-      <div className="absolute right-2 top-24 bottom-2 w-[360px] grid grid-cols-3 gap-1.5 content-start overflow-y-auto pl-1 custom-scrollbar">
+      {/* TO-BE 우측: 모든 태스크 (3열 배치, 스크롤바 숨김) */}
+      <div className="absolute right-2 top-28 bottom-2 w-[400px] grid grid-cols-3 gap-1.5 content-start overflow-y-auto pl-1 no-scrollbar">
         {allTasks.map((task, i) => (
           <ServerNode key={'tobe-' + task.id} task={task} mode="tobe" index={i} />
         ))}
