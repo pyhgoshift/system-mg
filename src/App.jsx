@@ -206,15 +206,14 @@ function StatMini({ label, value, color, size = "text-2xl" }) {
 
 function DataMigrationVisual({ tasks, flowingTasks, tick }) {
   return (
-    <div className="relative h-[240px] md:h-[480px] w-full overflow-hidden">
+    <div className="relative h-[240px] md:h-[480px] w-full overflow-hidden flex justify-center">
       {/* 미래형 네온 비주얼 배경 */}
-      <div className="absolute inset-0 z-10 pointer-events-none">
-        <svg className="w-full h-full" viewBox="0 0 1200 480" preserveAspectRatio="xMidYMin meet">
-
+      <div className="absolute inset-0 z-10 pointer-events-none flex justify-center">
+        <svg className="w-full h-full max-w-[1600px]" viewBox="0 0 1600 480" preserveAspectRatio="xMidYMin meet">
           <defs>
             <linearGradient id="neonGrad" x1="0%" y1="0%" x2="100%" y2="0%">
               <stop offset="0%" stopColor="#A78BFA" stopOpacity="0" />
-              <stop offset="60%" stopColor="#22D3EE" stopOpacity="0.1" />
+              <stop offset="50%" stopColor="#22D3EE" stopOpacity="0.1" />
               <stop offset="100%" stopColor="#34D399" stopOpacity="1" />
             </linearGradient>
             <marker id="arrow" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
@@ -224,7 +223,8 @@ function DataMigrationVisual({ tasks, flowingTasks, tick }) {
           {Array.from({ length: 60 }).map((_, i) => {
             const yStart = 20 + i * 8;
             const yEnd = 240 + (i - 30) * 4.5;
-            const path = `M 200,${yStart} C 900,${yStart} 300,${yEnd} 1000,${yEnd}`;
+            // X=100에서 X=1500까지 1600px 뷰박스 기준 완벽한 센터링
+            const path = `M 100,${yStart} C 1100,${yStart} 500,${yEnd} 1500,${yEnd}`;
             return (
               <React.Fragment key={i}>
                 <path d={path} stroke="url(#neonGrad)" strokeWidth={2.5 + (i % 3) * 1.5} fill="none" opacity={0.3 + (i % 5) * 0.1} markerEnd="url(#arrow)" style={{ filter: 'drop-shadow(0 0 35px rgba(52,211,153,0.8))' }} />
@@ -236,19 +236,19 @@ function DataMigrationVisual({ tasks, flowingTasks, tick }) {
           })}
         </svg>
 
-        {/* 플로팅 태스크 */}
-        <div className="absolute inset-0">
+        {/* 플로팅 태스크 - 중앙 대칭 좌표 */}
+        <div className="absolute inset-0 max-w-[1600px] mx-auto">
           {flowingTasks.slice(0, 4).map((t, i) => (
             <FloatingTaskLabel key={t.id} task={t} index={i} tick={tick} />
           ))}
         </div>
       </div>
 
-      {/* 태스크 그리드 (모바일 대응) */}
-      <div className="absolute left-1 md:left-2 top-0 bottom-2 w-[120px] md:w-[430px] grid grid-cols-1 md:grid-cols-3 gap-0.5 md:gap-1 content-start overflow-y-auto no-scrollbar z-20">
+      {/* 태스크 그리드 (좌우 대칭 배치) */}
+      <div className="absolute left-1 md:left-4 top-0 bottom-2 w-[110px] md:w-[430px] grid grid-cols-1 md:grid-cols-3 gap-0.5 md:gap-1 content-start overflow-y-auto no-scrollbar z-20">
         {tasks.map((t, i) => <ServerNode key={'asis-'+t.id} task={t} mode="asis" index={i} />)}
       </div>
-      <div className="absolute right-1 md:right-2 top-0 bottom-2 w-[120px] md:w-[430px] grid grid-cols-1 md:grid-cols-3 gap-0.5 md:gap-1 content-start overflow-y-auto no-scrollbar z-20">
+      <div className="absolute right-1 md:right-4 top-0 bottom-2 w-[110px] md:w-[430px] grid grid-cols-1 md:grid-cols-3 gap-0.5 md:gap-1 content-start overflow-y-auto no-scrollbar z-20">
         {tasks.map((t, i) => <ServerNode key={'tobe-'+t.id} task={t} mode="tobe" index={i} />)}
       </div>
     </div>
@@ -257,7 +257,8 @@ function DataMigrationVisual({ tasks, flowingTasks, tick }) {
 
 function NeonPhoton({ i, pIdx, tick }) {
   const progress = ((tick * (0.9 + i * 0.03) + pIdx * 33) % 100) / 100;
-  const x = 200 + (1000 - 200) * progress;
+  // 1600px 대칭 시스템에 맞춰 X축 이동 거리 재계산 (100 -> 1500)
+  const x = 100 + (1500 - 100) * progress;
   const t = progress;
   const yStart = 20 + i * 8;
   const yEnd = 240 + (i - 30) * 4.5;
@@ -279,7 +280,8 @@ function NeonPhoton({ i, pIdx, tick }) {
 
 function FloatingTaskLabel({ task, index, tick }) {
   const yBase = 240 + (index % 3 - 1) * 120; 
-  const x = 950 + (Math.sin(tick * 0.02 + index) * 40); 
+  // 1600px 시스템의 도착지(1500) 근처로 라벨 위치 조정
+  const x = 1450 + (Math.sin(tick * 0.02 + index) * 40); 
   const y = yBase + (Math.cos(tick * 0.02 + index) * 30); 
   return (
     <div className="absolute px-3 md:px-6 py-1 md:py-2 rounded-full border-2 border-emerald-400/80 bg-black/95 backdrop-blur-3xl shadow-[0_0_50px_rgba(52,211,153,0.6)] flex items-center gap-2 md:gap-4 transition-all duration-1000 z-50 whitespace-nowrap scale-75 md:scale-100"
