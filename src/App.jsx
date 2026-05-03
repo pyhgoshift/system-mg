@@ -206,70 +206,74 @@ function DataMigrationVisual({ tasks, flowingTasks, tick }) {
   
   return (
     <div className="relative h-[480px]">
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 flex flex-col items-center z-10">
-        <div className="relative w-full h-32 flex items-center justify-between px-6">
-          {/* 발신지 서버 */}
-          <div className="flex flex-col items-center gap-2">
-            <div className="w-16 h-16 rounded-2xl bg-slate-800 border border-slate-700 flex items-center justify-center shadow-2xl relative overflow-hidden">
-              <Server className="w-8 h-8 text-slate-400" />
-              <div className="absolute top-0 left-0 w-full h-1 bg-slate-700" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] flex flex-col items-center z-10">
+        <div className="relative w-full h-64 flex items-center justify-between px-2">
+          {/* 발신지 서버 (더 크게) */}
+          <div className="flex flex-col items-center gap-4">
+            <div className="w-24 h-24 rounded-3xl bg-slate-800 border-2 border-slate-700 flex items-center justify-center shadow-2xl relative overflow-hidden">
+              <Server className="w-12 h-12 text-slate-400" />
+              <div className="absolute top-0 left-0 w-full h-2 bg-slate-700" />
             </div>
-            <span className="text-[10px] font-black text-slate-500 tracking-widest uppercase">AS-IS Server</span>
+            <span className="text-xs font-black text-slate-500 tracking-[0.2em] uppercase">AS-IS Server</span>
           </div>
 
-          {/* 연결 경로 & 이동 입자 (빛광자) */}
-          <div className="flex-1 h-px bg-gradient-to-r from-slate-700 via-emerald-500/40 to-cyan-400/40 relative mx-4">
-            <ArrowRight className="absolute -right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-cyan-400 opacity-20" />
-            
-            {/* 12개의 빛광자 표현 */}
-            {Array.from({ length: 12 }).map((_, i) => {
-              const delay = i * 8.33; // 균등 분할
-              const speed = 2.5;
-              const progress = (tick * speed + delay) % 100;
-              const size = 1.5 + Math.sin(tick * 0.2 + i) * 0.5;
-              const opacity = 1 - Math.abs(0.5 - progress / 100) * 2;
+          {/* 10개 이상의 다중 연결 경로 & 이동 입자 */}
+          <div className="flex-1 relative mx-8 h-48 flex flex-col justify-between py-2">
+            {Array.from({ length: 10 }).map((_, lineIdx) => (
+              <div key={lineIdx} className="w-full h-px bg-gradient-to-r from-slate-700/30 via-emerald-500/20 to-cyan-400/30 relative">
+                {/* 각 라인별 빛광자들 */}
+                {[0, 1].map(i => {
+                  const delay = (lineIdx * 15 + i * 50) % 100;
+                  const speed = 1.5 + Math.random();
+                  const progress = (tick * speed + delay) % 100;
+                  const size = 1.2 + Math.sin(tick * 0.1 + lineIdx) * 0.3;
+                  const opacity = 1 - Math.abs(0.5 - progress / 100) * 2;
 
-              return (
-                <div key={i} className="absolute top-1/2 -translate-y-1/2 rounded-full"
-                  style={{
-                    left: `${progress}%`,
-                    width: `${size * 2}px`,
-                    height: `${size * 2}px`,
-                    background: i % 2 === 0 ? '#34D399' : '#22D3EE',
-                    boxShadow: `0 0 ${size * 10}px ${i % 2 === 0 ? '#34D399' : '#22D3EE'}`,
-                    opacity: opacity * 0.8,
-                    filter: 'blur(0.5px)',
-                    transition: 'left 0.1s linear'
-                  }}
-                >
-                  {/* 잔상 효과 */}
-                  <div className="absolute top-1/2 right-full -translate-y-1/2 h-[1px] w-8 bg-gradient-to-l from-current to-transparent opacity-30" 
-                    style={{ color: i % 2 === 0 ? '#34D399' : '#22D3EE' }}
-                  />
-                </div>
-              );
-            })}
+                  return (
+                    <div key={i} className="absolute top-1/2 -translate-y-1/2 rounded-full"
+                      style={{
+                        left: `${progress}%`,
+                        width: `${size * 2}px`,
+                        height: `${size * 2}px`,
+                        background: lineIdx % 2 === 0 ? '#34D399' : '#22D3EE',
+                        boxShadow: `0 0 ${size * 12}px ${lineIdx % 2 === 0 ? '#34D399' : '#22D3EE'}`,
+                        opacity: opacity * 0.7,
+                        filter: 'blur(0.3px)',
+                      }}
+                    >
+                      <div className="absolute top-1/2 right-full -translate-y-1/2 h-[1px] w-12 bg-gradient-to-l from-current to-transparent opacity-20" 
+                        style={{ color: lineIdx % 2 === 0 ? '#34D399' : '#22D3EE' }}
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+            ))}
+            <ArrowRight className="absolute -right-4 top-1/2 -translate-y-1/2 w-6 h-6 text-cyan-400 opacity-20" />
           </div>
 
-          {/* 목적지 클라우드 */}
-          <div className="flex flex-col items-center gap-2">
-            <div className="w-20 h-20 rounded-3xl bg-cyan-500/10 border-2 border-cyan-500/50 flex items-center justify-center shadow-[0_0_40px_rgba(34,211,238,0.2)] relative">
-              <Cloud className="w-10 h-10 text-cyan-400 animate-pulse" />
-              <div className="absolute -top-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full border-2 border-[#0A0E27] animate-ping" />
+          {/* 목적지 클라우드 (더 크게) */}
+          <div className="flex flex-col items-center gap-4">
+            <div className="w-28 h-28 rounded-[2rem] bg-cyan-500/10 border-2 border-cyan-500/50 flex items-center justify-center shadow-[0_0_60px_rgba(34,211,238,0.3)] relative">
+              <Cloud className="w-14 h-14 text-cyan-400 animate-pulse" />
+              <div className="absolute -top-2 -right-2 w-6 h-6 bg-emerald-500 rounded-full border-4 border-[#0A0E27] animate-ping" />
             </div>
-            <span className="text-[10px] font-black text-cyan-400 tracking-widest uppercase">TO-BE Cloud</span>
+            <span className="text-xs font-black text-cyan-400 tracking-[0.2em] uppercase">TO-BE Cloud</span>
           </div>
         </div>
 
-        {/* 실시간 동기화 상태 */}
-        <div className="mt-14 px-8 py-4 rounded-[2rem] backdrop-blur-2xl border border-white/10 bg-white/5 text-center shadow-2xl">
-          <div className="text-[11px] tracking-[0.5em] text-cyan-300/60 mb-2 font-black uppercase">Data Migration Active</div>
-          <div className="flex items-center justify-center gap-3">
-            <div className="text-4xl font-black text-cyan-400 tabular-nums leading-none">{flowingTasks.length}</div>
-            <div className="h-8 w-px bg-white/10" />
+        {/* 실시간 동기화 상태 (강조) */}
+        <div className="mt-8 px-10 py-5 rounded-[2.5rem] backdrop-blur-3xl border border-white/10 bg-white/5 text-center shadow-2xl">
+          <div className="text-[11px] tracking-[0.6em] text-cyan-300/60 mb-3 font-black uppercase">Migration Traffic Active</div>
+          <div className="flex items-center justify-center gap-6">
+            <div className="flex items-baseline gap-1">
+              <span className="text-5xl font-black text-cyan-400 tabular-nums leading-none">{flowingTasks.length}</span>
+              <span className="text-xs text-cyan-400/60 font-black">SYNC</span>
+            </div>
+            <div className="h-10 w-px bg-white/10" />
             <div className="text-left">
-              <div className="text-[9px] text-white/30 font-bold uppercase">Syncing Now</div>
-              <div className="text-xs font-black text-white/80">{Math.round((doneTasks.length / tasks.length) * 100)}% Total</div>
+              <div className="text-[10px] text-white/30 font-bold uppercase tracking-widest">Global Progress</div>
+              <div className="text-lg font-black text-white/90">{Math.round((doneTasks.length / tasks.length) * 100)}% COMPLETE</div>
             </div>
           </div>
         </div>
@@ -400,9 +404,9 @@ function Styles() {
       @keyframes nodeBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
       .node-blink { 
         animation: nodeBlink 0.8s infinite !important;
-        background: #FBBF24 !important;
-        border-color: #FFF !important;
-        box-shadow: 0 0 25px #FBBF24 !important;
+        background: rgba(251, 191, 36, 0.5) !important;
+        border-color: #FBBF24 !important;
+        box-shadow: 0 0 25px rgba(251, 191, 36, 0.3) !important;
         z-index: 50;
         position: relative;
       }
