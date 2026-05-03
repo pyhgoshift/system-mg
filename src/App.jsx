@@ -350,7 +350,7 @@ function DataMigrationVisual({ tasks, flowingTasks, tick }) {
           
           const colors = ['#22D3EE', '#A78BFA', '#34D399', '#FF5E9F', '#3B82F6'];
           const color = colors[i % colors.length];
-          const duration = 12; // 훨씬 더 느리고 일정한 속도 (기존 4s -> 12s)
+          const duration = 30; // 훨씬 더 느린 속도 (12s -> 30s)
           const delay = (i / 24) * -duration; // 골고루 퍼지도록 간격 조절
 
           return (
@@ -358,7 +358,7 @@ function DataMigrationVisual({ tasks, flowingTasks, tick }) {
               {/* 베이스 흐릿한 라인 */}
               <path d={path} stroke={color} strokeWidth={2} fill="none" opacity="0.15" />
               
-              {/* 일정한 간격으로 천천히 흐르는 데이터 빛 */}
+              {/* 일정한 간격으로 매우 천천히 흐르는 데이터 빛 */}
               <path 
                 d={path} 
                 stroke={color} 
@@ -389,15 +389,15 @@ function DataMigrationVisual({ tasks, flowingTasks, tick }) {
         })}
       </svg>
 
-      {/* AS-IS 좌측: 모든 태스크 */}
-      <div className="absolute left-2 top-16 bottom-2 w-[260px] grid grid-cols-2 gap-2 content-start overflow-y-auto pr-1">
+      {/* AS-IS 좌측: 모든 태스크 (3열 배치) */}
+      <div className="absolute left-2 top-8 bottom-2 w-[360px] grid grid-cols-3 gap-1.5 content-start overflow-y-auto pr-1 custom-scrollbar">
         {allTasks.map((task, i) => (
           <ServerNode key={'asis-' + task.id} task={task} mode="asis" index={i} />
         ))}
       </div>
 
-      {/* TO-BE 우측: 모든 태스크 (동일) */}
-      <div className="absolute right-2 top-16 bottom-2 w-[260px] grid grid-cols-2 gap-2 content-start overflow-y-auto pl-1">
+      {/* TO-BE 우측: 모든 태스크 (3열 배치) */}
+      <div className="absolute right-2 top-8 bottom-2 w-[360px] grid grid-cols-3 gap-1.5 content-start overflow-y-auto pl-1 custom-scrollbar">
         {allTasks.map((task, i) => (
           <ServerNode key={'tobe-' + task.id} task={task} mode="tobe" index={i} />
         ))}
