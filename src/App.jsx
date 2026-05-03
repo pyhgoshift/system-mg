@@ -225,7 +225,6 @@ function DataMigrationVisual({ tasks, flowingTasks, tick }) {
             const path = `M 200,${yStart} C 900,${yStart} 300,${yEnd} 1000,${yEnd}`;
             return (
               <React.Fragment key={i}>
-                {/* 배경 라인 5배 초강력 강조: 두께, 투명도, 글로우 대폭 상향 */}
                 <path d={path} stroke="url(#neonGrad)" strokeWidth={2.5 + (i % 3) * 1.5} fill="none" opacity={0.3 + (i % 5) * 0.1} markerEnd="url(#arrow)" style={{ filter: 'drop-shadow(0 0 35px rgba(52,211,153,0.8))' }} />
                 <NeonPhoton key={`p1-${i}`} i={i} pIdx={0} tick={tick} />
                 <NeonPhoton key={`p2-${i}`} i={i} pIdx={1} tick={tick} />
@@ -240,8 +239,6 @@ function DataMigrationVisual({ tasks, flowingTasks, tick }) {
           {flowingTasks.slice(0, 4).map((t, i) => (
             <FloatingTaskLabel key={t.id} task={t} index={i} tick={tick} />
           ))}
-        </div>
-
         </div>
       </div>
 
