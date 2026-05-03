@@ -139,9 +139,14 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <main className="relative px-6 pb-4">
+      <main className="relative px-2 md:px-6 pb-4">
         <DataMigrationVisual tasks={tasks} flowingTasks={flowingTasks} tick={tick} />
-        <CapsuleGauges tasks={tasks} />
+        <div className="hidden md:block">
+          <CapsuleGauges tasks={tasks} />
+        </div>
+        <div className="md:hidden">
+          <MobileGauges tasks={tasks} />
+        </div>
         <DnsPanel dnsTask={dnsTask} dnsReady={dnsReady} urlTasks={urlTasks} verifiedUrls={verifiedUrls} verifyingId={verifyingId} onUrlClick={handleUrlClick} />
       </main>
 
@@ -154,17 +159,17 @@ export default function Dashboard() {
 function Header({ now, stats, connStatus, lastSync }) {
   const time = now.toLocaleTimeString('ko-KR', { hour12: false });
   return (
-    <header className="relative pt-4 pb-2 px-10 text-center z-40">
-      <div className="flex items-center justify-center gap-4 mb-2 text-sm">
-        <div className="px-3 py-1 rounded bg-white/10 text-[10px] font-black tracking-tighter">v1.7</div>
-        <div className="w-3 h-3 rounded-full bg-rose-500 animate-pulse shadow-[0_0_15px_rgba(244,63,94,0.8)]" />
-        <span className="text-rose-300 font-black tracking-[0.5em] text-xs">LIVE MONITORING</span>
-        <span className="text-white/30">·</span>
-        <span className="text-white/80 font-black text-base tabular-nums tracking-widest">{time}</span>
-        <span className="text-white/30">·</span>
-        <span className="font-black uppercase text-xs tracking-widest" style={{ color: connStatus === 'connected' ? '#34D399' : '#FBBF24' }}>{connStatus}</span>
+    <header className="relative pt-4 pb-2 px-4 md:px-10 text-center z-40">
+      <div className="flex flex-wrap items-center justify-center gap-2 md:gap-4 mb-2 text-[10px] md:text-sm">
+        <div className="px-2 py-0.5 rounded bg-white/10 text-[8px] md:text-[10px] font-black tracking-tighter">v2.5</div>
+        <div className="w-2 h-2 md:w-3 md:h-3 rounded-full bg-rose-500 animate-pulse shadow-[0_0_15px_rgba(244,63,94,0.8)]" />
+        <span className="text-rose-300 font-black tracking-[0.2em] md:tracking-[0.5em] text-[10px] md:text-xs">LIVE MONITORING</span>
+        <span className="hidden md:inline text-white/30">·</span>
+        <span className="text-white/80 font-black text-sm md:text-base tabular-nums tracking-widest">{time}</span>
+        <span className="hidden md:inline text-white/30">·</span>
+        <span className="font-black uppercase text-[10px] md:text-xs tracking-widest" style={{ color: connStatus === 'connected' ? '#34D399' : '#FBBF24' }}>{connStatus}</span>
       </div>
-      <h1 className="text-4xl font-black tracking-tight mb-4" style={{
+      <h1 className="text-xl md:text-4xl font-black tracking-tight mb-4 px-4" style={{
         background: 'linear-gradient(90deg, #A78BFA, #22D3EE, #34D399)',
         backgroundSize: '200% auto',
         WebkitBackgroundClip: 'text',
@@ -172,16 +177,16 @@ function Header({ now, stats, connStatus, lastSync }) {
         animation: 'titleShine 8s linear infinite'
       }}>경기도교육청 중앙도서관 이전 통합 모니터링</h1>
       
-      <div className="flex items-center justify-center gap-12">
-        <div className="flex items-center gap-4">
-          <div className="text-[10px] text-white/40 uppercase tracking-[0.2em] font-black">Overall</div>
-          <div className="text-5xl font-black text-emerald-400 drop-shadow-[0_0_20px_rgba(52,211,153,0.3)]">{stats.overall}%</div>
+      <div className="flex items-center justify-center gap-4 md:gap-12 scale-90 md:scale-100">
+        <div className="flex items-center gap-2 md:gap-4">
+          <div className="text-[8px] md:text-[10px] text-white/40 uppercase tracking-[0.1em] md:tracking-[0.2em] font-black">Overall</div>
+          <div className="text-2xl md:text-5xl font-black text-emerald-400 drop-shadow-[0_0_20px_rgba(52,211,153,0.3)]">{stats.overall}%</div>
         </div>
-        <div className="w-px h-10 bg-white/10" />
-        <div className="flex gap-8">
-          <StatMini label="완료" value={stats.done} color="#34D399" size="text-2xl" />
-          <StatMini label="진행" value={stats.prog} color="#FBBF24" size="text-2xl" />
-          <StatMini label="대기" value={stats.wait} color="#64748B" size="text-2xl" />
+        <div className="w-px h-6 md:h-10 bg-white/10" />
+        <div className="flex gap-4 md:gap-8">
+          <StatMini label="완료" value={stats.done} color="#34D399" size="text-lg md:text-2xl" />
+          <StatMini label="진행" value={stats.prog} color="#FBBF24" size="text-lg md:text-2xl" />
+          <StatMini label="대기" value={stats.wait} color="#64748B" size="text-lg md:text-2xl" />
         </div>
       </div>
     </header>
@@ -198,14 +203,12 @@ function StatMini({ label, value, color, size = "text-2xl" }) {
 }
 
 function DataMigrationVisual({ tasks, flowingTasks, tick }) {
-  const doneTasks = tasks.filter(t => t.status === 'done');
-  
   return (
-    <div className="relative h-[480px]">
+    <div className="relative h-[300px] md:h-[480px]">
       {/* 미래형 네온 비주얼 배경 */}
       <div className="absolute inset-0 z-10 overflow-hidden pointer-events-none">
         <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, rgba(34,211,238,0.2) 1px, transparent 0)', backgroundSize: '40px 40px' }} />
-        <svg className="absolute inset-0 w-full h-full" viewBox="0 0 1200 480">
+        <svg className="absolute inset-0 w-full h-full" viewBox="0 0 1200 480" preserveAspectRatio="xMidYMid slice">
           <defs>
             <linearGradient id="neonGrad" x1="0%" y1="0%" x2="100%" y2="0%">
               <stop offset="0%" stopColor="#A78BFA" stopOpacity="0" />
@@ -239,21 +242,14 @@ function DataMigrationVisual({ tasks, flowingTasks, tick }) {
           ))}
         </div>
 
-        {/* 바이너리 레이어 */}
-        <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 flex justify-center gap-12 opacity-5 font-mono text-[10px] select-none">
-          {[1,2,3,4].map(v => (
-            <div key={v} className="flex flex-col gap-1">
-              {[1,2,3,4,5,6].map(h => <span key={h}>{Math.random() > 0.5 ? '10101' : '01101'}</span>)}
-            </div>
-          ))}
         </div>
       </div>
 
-      {/* 태스크 그리드 (최상단 밀착) */}
-      <div className="absolute left-2 top-0 bottom-2 w-[430px] grid grid-cols-3 gap-1 content-start overflow-y-auto no-scrollbar z-20">
+      {/* 태스크 그리드 (모바일 대응) */}
+      <div className="absolute left-1 md:left-2 top-0 bottom-2 w-[120px] md:w-[430px] grid grid-cols-1 md:grid-cols-3 gap-0.5 md:gap-1 content-start overflow-y-auto no-scrollbar z-20">
         {tasks.map((t, i) => <ServerNode key={'asis-'+t.id} task={t} mode="asis" index={i} />)}
       </div>
-      <div className="absolute right-2 top-0 bottom-2 w-[430px] grid grid-cols-3 gap-1 content-start overflow-y-auto no-scrollbar z-20">
+      <div className="absolute right-1 md:right-2 top-0 bottom-2 w-[120px] md:w-[430px] grid grid-cols-1 md:grid-cols-3 gap-0.5 md:gap-1 content-start overflow-y-auto no-scrollbar z-20">
         {tasks.map((t, i) => <ServerNode key={'tobe-'+t.id} task={t} mode="tobe" index={i} />)}
       </div>
     </div>
@@ -283,15 +279,14 @@ function NeonPhoton({ i, pIdx, tick }) {
 }
 
 function FloatingTaskLabel({ task, index, tick }) {
-  // 겹치지 않도록 index에 따라 Y 위치를 확실히 분산 (상/중/하 분할)
   const yBase = 240 + (index % 3 - 1) * 120; 
   const x = 950 + (Math.sin(tick * 0.02 + index) * 40); 
   const y = yBase + (Math.cos(tick * 0.02 + index) * 30); 
   return (
-    <div className="absolute px-6 py-2 rounded-full border-2 border-emerald-400/80 bg-black/95 backdrop-blur-3xl shadow-[0_0_50px_rgba(52,211,153,0.6)] flex items-center gap-4 transition-all duration-1000 z-50"
+    <div className="absolute px-3 md:px-6 py-1 md:py-2 rounded-full border-2 border-emerald-400/80 bg-black/95 backdrop-blur-3xl shadow-[0_0_50px_rgba(52,211,153,0.6)] flex items-center gap-2 md:gap-4 transition-all duration-1000 z-50 whitespace-nowrap scale-75 md:scale-100"
       style={{ left: x, top: y, transform: 'translate(-50%, -50%)' }}>
-      <div className="w-3 h-3 rounded-full bg-emerald-400 shadow-[0_0_15px_#34D399] animate-pulse" />
-      <span className="text-xs font-black text-white uppercase tracking-[0.2em]">작업번호: {task.id}</span>
+      <div className="w-2 md:h-3 md:w-3 h-2 rounded-full bg-emerald-400 shadow-[0_0_15px_#34D399] animate-pulse" />
+      <span className="text-[10px] md:text-xs font-black text-white uppercase tracking-[0.1em] md:tracking-[0.2em]">작업: {task.id}</span>
     </div>
   );
 }
@@ -307,18 +302,41 @@ function ServerNode({ task, mode, index }) {
   const isDoneTobe = !isAsIs && done;
 
   return (
-    <div className={`p-2 rounded-lg border transition-all duration-500 ${blinking ? 'node-blink' : ''}`}
+    <div className={`p-1 md:p-2 rounded md:rounded-lg border transition-all duration-500 ${blinking ? 'node-blink' : ''}`}
       style={{
         background: isDoneTobe ? 'rgba(59, 130, 246, 0.5)' : deactivated ? 'rgba(15,23,42,0.6)' : active ? `${g.color}15` : 'rgba(15,23,42,0.8)',
         borderColor: isDoneTobe ? '#3B82F6' : deactivated ? 'rgba(255,255,255,0.05)' : blinking ? '#FBBF24' : `${g.color}40`,
         opacity: deactivated ? 0.4 : 1,
         boxShadow: isDoneTobe ? '0 0 15px rgba(59, 130, 246, 0.3)' : 'none'
       }}>
-      <div className="flex justify-between items-center mb-1">
-        <span className="text-[9px] font-mono" style={{ color: deactivated ? '#444' : g.color }}>{task.id}</span>
-        {blinking && <div className="w-1.5 h-1.5 rounded-full bg-white animate-ping" />}
+      <div className="flex justify-between items-center mb-0.5 md:mb-1">
+        <span className="text-[7px] md:text-[9px] font-mono" style={{ color: deactivated ? '#444' : g.color }}>{task.id}</span>
+        {blinking && <div className="w-1 h-1 md:w-1.5 md:h-1.5 rounded-full bg-white animate-ping" />}
       </div>
-      <div className="text-[10px] font-bold truncate leading-tight">{task.name.replace(/^\d+\.\d+\s*/, '')}</div>
+      <div className="text-[8px] md:text-[10px] font-bold truncate leading-tight">{task.name.replace(/^\d+\.\d+\s*/, '')}</div>
+    </div>
+  );
+}
+
+function MobileGauges({ tasks }) {
+  const byGroup = useMemo(() => {
+    const r = {};
+    Object.keys(TASK_GROUPS).forEach(g => {
+      const f = tasks.filter(t => t.group === g);
+      const pct = f.length ? Math.round(f.reduce((s, t) => s + t.progress, 0) / f.length) : 0;
+      r[g] = { pct };
+    });
+    return r;
+  }, [tasks]);
+
+  return (
+    <div className="mt-4 grid grid-cols-3 gap-2">
+      {Object.entries(TASK_GROUPS).map(([key, g]) => (
+        <div key={key} className="p-2 rounded-xl bg-white/5 border border-white/10 text-center">
+          <div className="text-[8px] font-black uppercase text-white/40 mb-1">{g.label}</div>
+          <div className="text-sm font-black" style={{ color: g.color }}>{byGroup[key].pct}%</div>
+        </div>
+      ))}
     </div>
   );
 }
@@ -362,22 +380,22 @@ function CapsuleGauges({ tasks }) {
 
 function DnsPanel({ dnsTask, dnsReady, urlTasks, verifiedUrls, onUrlClick }) {
   return (
-    <div className="mt-6 mx-32 p-3 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-between gap-8 backdrop-blur-md">
-      <div className="flex items-center gap-4 pl-6">
+    <div className="mt-4 md:mt-6 mx-2 md:mx-32 p-3 rounded-2xl bg-white/5 border border-white/10 flex flex-col md:flex-row items-center justify-between gap-4 md:gap-8 backdrop-blur-md">
+      <div className="flex items-center gap-4 px-2 md:pl-6">
         <div className={`p-2 rounded-lg ${dnsReady ? 'bg-emerald-500/20' : 'bg-white/5'}`}>
-          <Globe className={`w-5 h-5 ${dnsReady ? 'text-emerald-400' : 'text-white/20'}`} />
+          <Globe className={`w-4 h-4 md:w-5 md:h-5 ${dnsReady ? 'text-emerald-400' : 'text-white/20'}`} />
         </div>
         <div>
-          <div className="text-[10px] font-black tracking-widest text-white/40 uppercase mb-0.5">DNS CUTOVER</div>
-          <div className="text-xs font-bold text-white/80">사용자 서비스 최종 검증</div>
+          <div className="text-[8px] md:text-[10px] font-black tracking-widest text-white/40 uppercase mb-0.5">DNS CUTOVER</div>
+          <div className="text-[10px] md:text-xs font-bold text-white/80">사용자 서비스 최종 검증</div>
         </div>
       </div>
-      <div className="flex gap-3 pr-6">
+      <div className="flex flex-wrap justify-center gap-2 px-2 md:pr-6">
         {urlTasks.map(t => {
           const ok = verifiedUrls.has(t.id) || t.status === 'done';
           return (
             <button key={t.id} disabled={!dnsReady || ok} onClick={() => onUrlClick(t.id)}
-              className={`px-5 py-2 rounded-xl text-[10px] font-black transition-all border ${ok ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-400 shadow-[0_0_15px_rgba(52,211,153,0.2)]' : 'bg-slate-800/40 border-white/5 text-white/20'}`}>
+              className={`px-3 md:px-5 py-1.5 md:py-2 rounded-lg md:rounded-xl text-[8px] md:text-[10px] font-black transition-all border ${ok ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-400 shadow-[0_0_15px_rgba(52,211,153,0.2)]' : 'bg-slate-800/40 border-white/5 text-white/20'}`}>
               {t.name.split(' ')[0]} {ok ? 'OK' : 'WAIT'}
             </button>
           );
