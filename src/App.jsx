@@ -4,7 +4,7 @@ import { CheckCircle2, Globe, Lock, ExternalLink, PartyPopper, Sparkles, Wifi, W
 // ============================
 // 설정
 // ============================
-const SHEETS_API_URL = '';  // ← Apps Script 배포 후 발급된 URL 입력
+const SHEETS_API_URL = 'https://script.google.com/macros/s/AKfycbzPtdKQtyibcPb0UXiYgYxZKjT8Cbbo_I1mYnXkt1IG4Ap0mbv6l4KGvlOts03qSCDAgw/exec';
 const POLL_INTERVAL_MS = 5000;
 
 // ============================
