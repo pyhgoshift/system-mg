@@ -208,9 +208,9 @@ function DataMigrationVisual({ tasks, flowingTasks, tick }) {
         <svg className="absolute inset-0 w-full h-full" viewBox="0 0 1200 480">
           <defs>
             <linearGradient id="neonGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#A78BFA" stopOpacity="0.05" />
-              <stop offset="40%" stopColor="#22D3EE" stopOpacity="0.4" />
-              <stop offset="100%" stopColor="#34D399" stopOpacity="0.9" />
+              <stop offset="0%" stopColor="#A78BFA" stopOpacity="0" />
+              <stop offset="60%" stopColor="#22D3EE" stopOpacity="0.1" />
+              <stop offset="100%" stopColor="#34D399" stopOpacity="1" />
             </linearGradient>
             <marker id="arrow" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
               <path d="M 0 0 L 10 5 L 0 10 z" fill="#34D399" />
@@ -219,11 +219,11 @@ function DataMigrationVisual({ tasks, flowingTasks, tick }) {
           {Array.from({ length: 60 }).map((_, i) => {
             const yStart = 20 + i * 8;
             const yEnd = 240 + (i - 30) * 4.5;
-            // S-곡선 경로: 중간 지점을 경유하도록 제어점 설정
-            const path = `M 200,${yStart} C 600,${yStart} 600,${yEnd} 1000,${yEnd}`;
+            // 유기적인 S-곡선: 제어점을 X축 깊숙이 교차시켜 유연한 곡률 생성
+            const path = `M 200,${yStart} C 900,${yStart} 300,${yEnd} 1000,${yEnd}`;
             return (
               <React.Fragment key={i}>
-                <path d={path} stroke="url(#neonGrad)" strokeWidth={0.2 + (i % 3) * 0.4} fill="none" opacity={0.05 + (i % 5) * 0.05} markerEnd="url(#arrow)" />
+                <path d={path} stroke="url(#neonGrad)" strokeWidth={0.5 + (i % 3) * 0.5} fill="none" opacity={0.05 + (i % 5) * 0.05} markerEnd="url(#arrow)" style={{ filter: 'drop-shadow(0 0 10px rgba(52,211,153,0.3))' }} />
                 <NeonPhoton key={`p1-${i}`} i={i} pIdx={0} tick={tick} />
                 <NeonPhoton key={`p2-${i}`} i={i} pIdx={1} tick={tick} />
               </React.Fragment>
@@ -260,20 +260,23 @@ function DataMigrationVisual({ tasks, flowingTasks, tick }) {
 }
 
 function NeonPhoton({ i, pIdx, tick }) {
-  const progress = ((tick * (1.2 + i * 0.08) + pIdx * 50) % 100) / 100;
+  const progress = ((tick * (0.8 + i * 0.04) + pIdx * 50) % 100) / 100;
   const x = 200 + (1000 - 200) * progress;
   const t = progress;
   const yStart = 20 + i * 8;
   const yEnd = 240 + (i - 30) * 4.5;
-  // S-곡선 계산 (Cubic Bezier: p0, c1, c2, p3)
-  const y = Math.pow(1-t, 3)*yStart + 3*Math.pow(1-t, 2)*t*yStart + 3*(1-t)*Math.pow(t, 2)*yEnd + Math.pow(t, 3)*yEnd;
+  
+  // S-곡선 좌표 계산 (M 200,yStart C 900,yStart 300,yEnd 1000,yEnd)
+  const cp1y = yStart;
+  const cp2y = yEnd;
+  const y = Math.pow(1-t, 3)*yStart + 3*Math.pow(1-t, 2)*t*cp1y + 3*(1-t)*Math.pow(t, 2)*cp2y + Math.pow(t, 3)*yEnd;
 
-  // 오른쪽으로 갈수록 훨씬 강렬해지는 광자 (강조 3배)
-  const intensity = Math.pow(progress, 2) * 1.5 + 0.1;
+  // 기하급수적으로 강해지는 광원 효과 (5제곱으로 더 날카롭게)
+  const intensity = Math.pow(progress, 5) * 3.0 + 0.02;
 
   return (
-    <circle cx={x} cy={y} r={1 + intensity * 3} fill={i % 2 === 0 ? '#A78BFA' : '#22D3EE'} style={{
-      filter: `drop-shadow(0 0 ${intensity * 25}px ${i % 2 === 0 ? '#A78BFA' : '#22D3EE'})`,
+    <circle cx={x} cy={y} r={1 + intensity * 5} fill={i % 2 === 0 ? '#A78BFA' : '#22D3EE'} style={{
+      filter: `drop-shadow(0 0 ${intensity * 40}px ${i % 2 === 0 ? '#A78BFA' : '#22D3EE'})`,
       opacity: intensity
     }} />
   );
