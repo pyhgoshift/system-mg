@@ -218,7 +218,7 @@ function DataMigrationVisual({ tasks, flowingTasks, tick }) {
           </defs>
           {Array.from({ length: 60 }).map((_, i) => {
             const yStart = 20 + i * 8;
-            const yEnd = 240 + (i - 30) * 1.5;
+            const yEnd = 240 + (i - 30) * 4.5; // 도착지 확산 범위를 3배 키움
             const path = `M 200,${yStart} C 500,${yStart} 750,${yEnd} 1000,${yEnd}`;
             return (
               <React.Fragment key={i}>
@@ -263,8 +263,8 @@ function NeonPhoton({ path, i, pIdx, tick }) {
   const x = 200 + (1000 - 200) * progress;
   // 가짜 곡선 위치 계산
   const t = progress;
-  const yStart = 40 + i * 14;
-  const yEnd = 240 + (i - 15) * 2.5;
+  const yStart = 20 + i * 8;
+  const yEnd = 240 + (i - 30) * 4.5; // 도착지 확산 범위를 3배 키움
   const cy1 = yStart, cy2 = yEnd;
   const y = Math.pow(1-t, 3)*yStart + 3*Math.pow(1-t, 2)*t*cy1 + 3*(1-t)*Math.pow(t, 2)*cy2 + Math.pow(t, 3)*yEnd;
 
