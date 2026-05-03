@@ -394,15 +394,15 @@ function DataMigrationVisual({ tasks, flowingTasks, tick }) {
         })}
       </svg>
 
-      {/* AS-IS 좌측: 모든 태스크 (3열 배치, 스크롤바 숨김) */}
-      <div className="absolute left-2 top-28 bottom-2 w-[400px] grid grid-cols-3 gap-1.5 content-start overflow-y-auto pr-1 no-scrollbar">
+      {/* AS-IS 좌측: 모든 태스크 (3열 배치, 더 상단으로 이동, 스크롤바 숨김) */}
+      <div className="absolute left-2 top-16 bottom-2 w-[410px] grid grid-cols-3 gap-1.5 content-start overflow-y-auto pr-1 no-scrollbar z-20">
         {allTasks.map((task, i) => (
           <ServerNode key={'asis-' + task.id} task={task} mode="asis" index={i} />
         ))}
       </div>
 
-      {/* TO-BE 우측: 모든 태스크 (3열 배치, 스크롤바 숨김) */}
-      <div className="absolute right-2 top-28 bottom-2 w-[400px] grid grid-cols-3 gap-1.5 content-start overflow-y-auto pl-1 no-scrollbar">
+      {/* TO-BE 우측: 모든 태스크 (3열 배치, 더 상단으로 이동, 스크롤바 숨김) */}
+      <div className="absolute right-2 top-16 bottom-2 w-[410px] grid grid-cols-3 gap-1.5 content-start overflow-y-auto pl-1 no-scrollbar z-20">
         {allTasks.map((task, i) => (
           <ServerNode key={'tobe-' + task.id} task={task} mode="tobe" index={i} />
         ))}
@@ -817,10 +817,24 @@ function Styles() {
         50% { opacity: 0.5; }
       }
       @keyframes nodeBlink {
-        0%, 100% { opacity: 1; transform: scale(1); }
-        50% { opacity: 0.7; transform: scale(0.99); }
+        0%, 100% { 
+          transform: scale(1); 
+          filter: brightness(1);
+          box-shadow: 0 0 0px rgba(255,255,255,0);
+        }
+        50% { 
+          transform: scale(1.08); 
+          filter: brightness(1.8);
+          background: rgba(251, 191, 36, 0.5) !important;
+          border-color: #FBBF24 !important;
+          box-shadow: 0 0 30px #FBBF24, 0 0 60px rgba(251, 191, 36, 0.4);
+        }
       }
-      .node-blink { animation: nodeBlink 1.2s ease-in-out infinite; }
+      .node-blink { 
+        animation: nodeBlink 0.6s cubic-bezier(0.4, 0, 0.2, 1) infinite !important;
+        position: relative;
+        z-index: 50;
+      }
 
       @keyframes fadein {
         from { opacity: 0; transform: translateY(6px); }
