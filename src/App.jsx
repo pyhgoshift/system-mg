@@ -205,78 +205,63 @@ function DataMigrationVisual({ tasks, flowingTasks, tick }) {
   const totalCount = tasks.length;
   
   return (
-    <div className="relative h-[480px]">
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] flex flex-col items-center z-10">
-        <div className="relative w-full h-64 flex items-center justify-between px-2">
-          {/* 발신지 서버 (더 크게) */}
-          <div className="flex flex-col items-center gap-4">
-            <div className="w-24 h-24 rounded-3xl bg-slate-800 border-2 border-slate-700 flex items-center justify-center shadow-2xl relative overflow-hidden">
-              <Server className="w-12 h-12 text-slate-400" />
-              <div className="absolute top-0 left-0 w-full h-2 bg-slate-700" />
-            </div>
-            <span className="text-xs font-black text-slate-500 tracking-[0.2em] uppercase">AS-IS Server</span>
-          </div>
+      <div className="absolute inset-0 z-10 overflow-hidden pointer-events-none">
+        {/* 그리드 배경 */}
+        <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, rgba(34,211,238,0.2) 1px, transparent 0)', backgroundSize: '40px 40px' }} />
 
-          {/* 10개 이상의 다중 연결 경로 & 이동 입자 */}
-          <div className="flex-1 relative mx-8 h-48 flex flex-col justify-between py-2">
-            {Array.from({ length: 10 }).map((_, lineIdx) => (
-              <div key={lineIdx} className="w-full h-px bg-gradient-to-r from-slate-700/30 via-emerald-500/20 to-cyan-400/30 relative">
-                {/* 각 라인별 빛광자들 */}
-                {[0, 1].map(i => {
-                  const delay = (lineIdx * 15 + i * 50) % 100;
-                  const speed = 1.5 + Math.random();
-                  const progress = (tick * speed + delay) % 100;
-                  const size = 1.2 + Math.sin(tick * 0.1 + lineIdx) * 0.3;
-                  const opacity = 1 - Math.abs(0.5 - progress / 100) * 2;
-
-                  return (
-                    <div key={i} className="absolute top-1/2 -translate-y-1/2 rounded-full"
-                      style={{
-                        left: `${progress}%`,
-                        width: `${size * 2}px`,
-                        height: `${size * 2}px`,
-                        background: lineIdx % 2 === 0 ? '#34D399' : '#22D3EE',
-                        boxShadow: `0 0 ${size * 12}px ${lineIdx % 2 === 0 ? '#34D399' : '#22D3EE'}`,
-                        opacity: opacity * 0.7,
-                        filter: 'blur(0.3px)',
-                      }}
-                    >
-                      <div className="absolute top-1/2 right-full -translate-y-1/2 h-[1px] w-12 bg-gradient-to-l from-current to-transparent opacity-20" 
-                        style={{ color: lineIdx % 2 === 0 ? '#34D399' : '#22D3EE' }}
-                      />
-                    </div>
-                  );
+        {/* 15개의 유선형 네온 경로 */}
+        <svg className="absolute inset-0 w-full h-full" viewBox="0 0 1200 480">
+          <defs>
+            <linearGradient id="flowGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="#A78BFA" stopOpacity="0.2" />
+              <stop offset="50%" stopColor="#22D3EE" stopOpacity="0.8" />
+              <stop offset="100%" stopColor="#34D399" stopOpacity="0.2" />
+            </linearGradient>
+          </defs>
+          {Array.from({ length: 15 }).map((_, i) => {
+            const yStart = 40 + i * 30;
+            const yEnd = 240 + (i - 7) * 5;
+            const path = `M 250,${yStart} C 500,${yStart} 700,${yEnd} 950,${yEnd}`;
+            return (
+              <React.Fragment key={i}>
+                <path d={path} stroke="url(#flowGrad)" strokeWidth="1" fill="none" opacity="0.3" />
+                {/* 흐르는 네온 광자 */}
+                {[0, 1].map(pIdx => {
+                  const progress = ((tick * (1.2 + i * 0.1) + pIdx * 50) % 100) / 100;
+                  return <NeonPhoton key={pIdx} path={path} progress={progress} color={i % 2 === 0 ? '#A78BFA' : '#22D3EE'} />;
                 })}
-              </div>
-            ))}
-            <ArrowRight className="absolute -right-4 top-1/2 -translate-y-1/2 w-6 h-6 text-cyan-400 opacity-20" />
-          </div>
+              </React.Fragment>
+            );
+          })}
+        </svg>
 
-          {/* 목적지 클라우드 (더 크게) */}
-          <div className="flex flex-col items-center gap-4">
-            <div className="w-28 h-28 rounded-[2rem] bg-cyan-500/10 border-2 border-cyan-500/50 flex items-center justify-center shadow-[0_0_60px_rgba(34,211,238,0.3)] relative">
-              <Cloud className="w-14 h-14 text-cyan-400 animate-pulse" />
-              <div className="absolute -top-2 -right-2 w-6 h-6 bg-emerald-500 rounded-full border-4 border-[#0A0E27] animate-ping" />
-            </div>
-            <span className="text-xs font-black text-cyan-400 tracking-[0.2em] uppercase">TO-BE Cloud</span>
-          </div>
+        {/* 플로팅 태스크 라벨 (진행 중인 태스크) */}
+        <div className="absolute inset-0">
+          {flowingTasks.slice(0, 5).map((t, i) => (
+            <FloatingTaskLabel key={t.id} task={t} index={i} tick={tick} />
+          ))}
         </div>
 
-        {/* 실시간 동기화 상태 (강조) */}
-        <div className="mt-8 px-10 py-5 rounded-[2.5rem] backdrop-blur-3xl border border-white/10 bg-white/5 text-center shadow-2xl">
-          <div className="text-[11px] tracking-[0.6em] text-cyan-300/60 mb-3 font-black uppercase">Migration Traffic Active</div>
-          <div className="flex items-center justify-center gap-6">
-            <div className="flex items-baseline gap-1">
-              <span className="text-5xl font-black text-cyan-400 tabular-nums leading-none">{flowingTasks.length}</span>
-              <span className="text-xs text-cyan-400/60 font-black">SYNC</span>
+        {/* 바이너리 비트 레이어 */}
+        <div className="absolute inset-0 flex items-center justify-center opacity-10 font-mono text-[10px] gap-8 pointer-events-none select-none">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="flex flex-col gap-2">
+              {Array.from({ length: 10 }).map((_, j) => (
+                <span key={j} className="animate-pulse" style={{ animationDelay: `${(i+j)*0.2}s` }}>
+                  {Math.random() > 0.5 ? '101001' : '001101'}
+                </span>
+              ))}
             </div>
-            <div className="h-10 w-px bg-white/10" />
-            <div className="text-left">
-              <div className="text-[10px] text-white/30 font-bold uppercase tracking-widest">Global Progress</div>
-              <div className="text-lg font-black text-white/90">{Math.round((doneTasks.length / tasks.length) * 100)}% COMPLETE</div>
-            </div>
-          </div>
+          ))}
         </div>
+      </div>
+
+      {/* 태스크 박스 사이드 배치 */}
+      <div className="absolute left-2 top-2 bottom-2 w-[430px] grid grid-cols-3 gap-1 content-start overflow-y-auto no-scrollbar z-20">
+        {tasks.map((t, i) => <ServerNode key={'asis-'+t.id} task={t} mode="asis" index={i} />)}
+      </div>
+      <div className="absolute right-2 top-2 bottom-2 w-[430px] grid grid-cols-3 gap-1 content-start overflow-y-auto no-scrollbar z-20">
+        {tasks.map((t, i) => <ServerNode key={'tobe-'+t.id} task={t} mode="tobe" index={i} />)}
       </div>
 
       {/* 태스크 박스 사이드 배치 (이미 적용됨) */}
@@ -286,6 +271,35 @@ function DataMigrationVisual({ tasks, flowingTasks, tick }) {
       <div className="absolute right-2 top-2 bottom-2 w-[430px] grid grid-cols-3 gap-1 content-start overflow-y-auto no-scrollbar z-20">
         {tasks.map((t, i) => <ServerNode key={'tobe-'+t.id} task={t} mode="tobe" index={i} />)}
       </div>
+    </div>
+  );
+}
+
+function NeonPhoton({ path, progress, color }) {
+  // SVG 경로 위 점 구하기 (간략화된 베지어 계산)
+  const x = 250 + (950 - 250) * progress;
+  const yBase = 40 + (Math.floor((x - 250) / 30) * 30); // 실제 경로 계산은 복잡하므로 대략적 위치
+  const yOffset = Math.sin(progress * Math.PI) * 100;
+  
+  return (
+    <circle r="2" fill={color} style={{
+      filter: `drop-shadow(0 0 8px ${color})`,
+      transition: 'all 0.1s linear',
+      cx: x,
+      cy: 40 + (progress * 200) + (Math.sin(progress * 5) * 20) // 가짜 곡선
+    }} />
+  );
+}
+
+function FloatingTaskLabel({ task, index, tick }) {
+  const x = 350 + (index * 120) + Math.sin(tick * 0.1 + index) * 20;
+  const y = 100 + (index * 60) + Math.cos(tick * 0.1 + index) * 20;
+  
+  return (
+    <div className="absolute px-4 py-1.5 rounded-full border-2 border-cyan-400/50 bg-black/80 backdrop-blur-md shadow-[0_0_20px_rgba(34,211,238,0.3)] flex items-center gap-2 transition-all duration-1000"
+      style={{ left: x, top: y }}>
+      <div className="w-2 h-2 rounded-full bg-cyan-400 animate-ping" />
+      <span className="text-[10px] font-black text-cyan-300 tracking-wider">TASK-{task.id}</span>
     </div>
   );
 }
