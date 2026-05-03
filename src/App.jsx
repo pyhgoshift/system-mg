@@ -205,8 +205,20 @@ function StatMini({ label, value, color, size = "text-2xl" }) {
 }
 
 function DataMigrationVisual({ tasks, flowingTasks, tick }) {
+  const [isMobile, setIsMobile] = React.useState(typeof window !== 'undefined' && window.innerWidth < 768);
+  
+  React.useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const endX = isMobile ? 1000 : 1200;
+  const labelX = endX - 50;
+
   return (
     <div className="relative h-[240px] md:h-[480px] w-full overflow-hidden flex justify-center">
+
       {/* 미래형 네온 비주얼 배경 */}
       <div className="absolute inset-0 z-10 pointer-events-none flex justify-center">
         <svg className="w-full h-full max-w-[1600px]" viewBox="0 0 1600 480" preserveAspectRatio="xMidYMin meet">
@@ -223,23 +235,23 @@ function DataMigrationVisual({ tasks, flowingTasks, tick }) {
           {Array.from({ length: 60 }).map((_, i) => {
             const yStart = 20 + i * 8;
             const yEnd = 240 + (i - 30) * 4.5;
-            // 타스크 박스 3개 분량만큼 우측으로 연장 (850 -> 1200)
-            const path = `M 50,${yStart} C 500,${yStart} 300,${yEnd} 1200,${yEnd}`;
+            // 디바이스에 따른 동적 종착지 적용
+            const path = `M 50,${yStart} C 500,${yStart} 300,${yEnd} ${endX},${yEnd}`;
             return (
               <React.Fragment key={i}>
                 <path d={path} stroke="url(#neonGrad)" strokeWidth={2.5 + (i % 3) * 1.5} fill="none" opacity={0.3 + (i % 5) * 0.1} markerEnd="url(#arrow)" style={{ filter: 'drop-shadow(0 0 35px rgba(52,211,153,0.8))' }} />
-                <NeonPhoton key={`p1-${i}`} i={i} pIdx={0} tick={tick} />
-                <NeonPhoton key={`p2-${i}`} i={i} pIdx={1} tick={tick} />
-                <NeonPhoton key={`p3-${i}`} i={i} pIdx={2} tick={tick} />
+                <NeonPhoton key={`p1-${i}`} i={i} pIdx={0} tick={tick} endX={endX} />
+                <NeonPhoton key={`p2-${i}`} i={i} pIdx={1} tick={tick} endX={endX} />
+                <NeonPhoton key={`p3-${i}`} i={i} pIdx={2} tick={tick} endX={endX} />
               </React.Fragment>
             );
           })}
         </svg>
 
-        {/* 플로팅 태스크 - 중앙 대칭 좌표 */}
+        {/* 플로팅 태스크 - 동적 좌표 적용 */}
         <div className="absolute inset-0 max-w-[1600px] mx-auto">
           {flowingTasks.slice(0, 4).map((t, i) => (
-            <FloatingTaskLabel key={t.id} task={t} index={i} tick={tick} />
+            <FloatingTaskLabel key={t.id} task={t} index={i} tick={tick} labelX={labelX} />
           ))}
         </div>
       </div>
@@ -255,10 +267,10 @@ function DataMigrationVisual({ tasks, flowingTasks, tick }) {
   );
 }
 
-function NeonPhoton({ i, pIdx, tick }) {
+function NeonPhoton({ i, pIdx, tick, endX }) {
   const progress = ((tick * (0.9 + i * 0.03) + pIdx * 33) % 100) / 100;
-  // 연장된 시스템에 맞춰 X축 이동 거리 재계산 (50 -> 1200)
-  const x = 50 + (1200 - 50) * progress;
+  // 디바이스별 endX에 맞춰 동적 재계산
+  const x = 50 + (endX - 50) * progress;
   const t = progress;
   const yStart = 20 + i * 8;
   const yEnd = 240 + (i - 30) * 4.5;
@@ -278,10 +290,10 @@ function NeonPhoton({ i, pIdx, tick }) {
   );
 }
 
-function FloatingTaskLabel({ task, index, tick }) {
+function FloatingTaskLabel({ task, index, tick, labelX }) {
   const yBase = 240 + (index % 3 - 1) * 120; 
-  // 연장된 시스템의 도착지(1200) 근처로 라벨 위치 조정
-  const x = 1150 + (Math.sin(tick * 0.02 + index) * 40); 
+  // 디바이스별 labelX에 맞춰 동적 재배치
+  const x = labelX + (Math.sin(tick * 0.02 + index) * 40); 
   const y = yBase + (Math.cos(tick * 0.02 + index) * 30); 
   return (
     <div className="absolute px-3 md:px-6 py-1 md:py-2 rounded-full border-2 border-emerald-400/80 bg-black/95 backdrop-blur-3xl shadow-[0_0_50px_rgba(52,211,153,0.6)] flex items-center gap-2 md:gap-4 transition-all duration-1000 z-50 whitespace-nowrap scale-75 md:scale-100"
