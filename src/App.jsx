@@ -217,18 +217,38 @@ function DataMigrationVisual({ tasks, flowingTasks, tick }) {
             <span className="text-[10px] font-black text-slate-500 tracking-widest uppercase">AS-IS Server</span>
           </div>
 
-          {/* 연결 경로 & 이동 입자 */}
-          <div className="flex-1 h-px bg-gradient-to-r from-slate-700 via-emerald-500 to-cyan-400 relative mx-4">
-            <ArrowRight className="absolute -right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-cyan-400 opacity-30" />
-            {[0, 1, 2, 3].map(i => (
-              <div key={i} className="absolute top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_15px_#22D3EE]"
-                style={{
-                  left: `${((tick * 3 + i * 25) % 100)}%`,
-                  opacity: 1 - Math.abs(0.5 - ((tick * 3 + i * 25) % 100) / 100) * 2,
-                  transform: `translateY(-50%) scale(${1 + Math.sin(tick * 0.1 + i) * 0.2})`
-                }}
-              />
-            ))}
+          {/* 연결 경로 & 이동 입자 (빛광자) */}
+          <div className="flex-1 h-px bg-gradient-to-r from-slate-700 via-emerald-500/40 to-cyan-400/40 relative mx-4">
+            <ArrowRight className="absolute -right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-cyan-400 opacity-20" />
+            
+            {/* 12개의 빛광자 표현 */}
+            {Array.from({ length: 12 }).map((_, i) => {
+              const delay = i * 8.33; // 균등 분할
+              const speed = 2.5;
+              const progress = (tick * speed + delay) % 100;
+              const size = 1.5 + Math.sin(tick * 0.2 + i) * 0.5;
+              const opacity = 1 - Math.abs(0.5 - progress / 100) * 2;
+
+              return (
+                <div key={i} className="absolute top-1/2 -translate-y-1/2 rounded-full"
+                  style={{
+                    left: `${progress}%`,
+                    width: `${size * 2}px`,
+                    height: `${size * 2}px`,
+                    background: i % 2 === 0 ? '#34D399' : '#22D3EE',
+                    boxShadow: `0 0 ${size * 10}px ${i % 2 === 0 ? '#34D399' : '#22D3EE'}`,
+                    opacity: opacity * 0.8,
+                    filter: 'blur(0.5px)',
+                    transition: 'left 0.1s linear'
+                  }}
+                >
+                  {/* 잔상 효과 */}
+                  <div className="absolute top-1/2 right-full -translate-y-1/2 h-[1px] w-8 bg-gradient-to-l from-current to-transparent opacity-30" 
+                    style={{ color: i % 2 === 0 ? '#34D399' : '#22D3EE' }}
+                  />
+                </div>
+              );
+            })}
           </div>
 
           {/* 목적지 클라우드 */}
