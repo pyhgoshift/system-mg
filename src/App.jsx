@@ -297,31 +297,6 @@ function DataMigrationVisual({ tasks, flowingTasks, tick }) {
 
   return (
     <div className="relative h-[480px] mt-4">
-      <div className="absolute top-0 left-0 z-20">
-        <div className="px-5 py-2 rounded-lg backdrop-blur-md" style={{
-          background: 'linear-gradient(135deg, rgba(100,116,139,0.3) 0%, rgba(30,41,59,0.5) 100%)',
-          border: '1px solid rgba(148,163,184,0.3)',
-          boxShadow: '0 0 20px rgba(100,116,139,0.2)'
-        }}>
-          <div className="text-2xl font-black tracking-tight text-slate-300">AS-IS</div>
-          <div className="text-[10px] tracking-widest text-slate-400">기존 환경</div>
-        </div>
-      </div>
-      <div className="absolute top-0 right-0 z-20">
-        <div className="px-5 py-2 rounded-lg backdrop-blur-md" style={{
-          background: 'linear-gradient(135deg, rgba(34,211,238,0.2) 0%, rgba(167,139,250,0.2) 100%)',
-          border: '1px solid rgba(52,211,153,0.4)',
-          boxShadow: '0 0 30px rgba(52,211,153,0.3)'
-        }}>
-          <div className="text-2xl font-black tracking-tight" style={{
-            background: 'linear-gradient(90deg, #34D399, #22D3EE)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent'
-          }}>TO-BE</div>
-          <div className="text-[10px] tracking-widest text-emerald-300">신규 환경</div>
-        </div>
-      </div>
-
       <svg className="absolute inset-0 w-full h-full" viewBox="0 0 1200 480" preserveAspectRatio="none">
         <defs>
           <radialGradient id="coreGlow" cx="50%" cy="50%" r="50%">
@@ -389,15 +364,41 @@ function DataMigrationVisual({ tasks, flowingTasks, tick }) {
         })}
       </svg>
 
-      {/* AS-IS 좌측: 모든 태스크 (3열 배치) */}
-      <div className="absolute left-2 top-8 bottom-2 w-[360px] grid grid-cols-3 gap-1.5 content-start overflow-y-auto pr-1 custom-scrollbar">
+      {/* AS-IS/TO-BE 최상단 라벨 */}
+      <div className="absolute top-4 left-4 z-30">
+        <div className="px-5 py-2 rounded-lg backdrop-blur-md" style={{
+          background: 'linear-gradient(135deg, rgba(100,116,139,0.3) 0%, rgba(30,41,59,0.5) 100%)',
+          border: '1px solid rgba(148,163,184,0.3)',
+          boxShadow: '0 0 20px rgba(100,116,139,0.2)'
+        }}>
+          <div className="text-2xl font-black tracking-tight text-slate-300">AS-IS</div>
+          <div className="text-[10px] tracking-widest text-slate-400">기존 환경</div>
+        </div>
+      </div>
+      <div className="absolute top-4 right-4 z-30">
+        <div className="px-5 py-2 rounded-lg backdrop-blur-md" style={{
+          background: 'linear-gradient(135deg, rgba(34,211,238,0.2) 0%, rgba(167,139,250,0.2) 100%)',
+          border: '1px solid rgba(52,211,153,0.4)',
+          boxShadow: '0 0 30px rgba(52,211,153,0.3)'
+        }}>
+          <div className="text-2xl font-black tracking-tight" style={{
+            background: 'linear-gradient(90deg, #34D399, #22D3EE)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent'
+          }}>TO-BE</div>
+          <div className="text-[10px] tracking-widest text-emerald-300">신규 환경</div>
+        </div>
+      </div>
+
+      {/* AS-IS 좌측: 모든 태스크 (3열 배치, 라벨 아래로 조정) */}
+      <div className="absolute left-2 top-24 bottom-2 w-[360px] grid grid-cols-3 gap-1.5 content-start overflow-y-auto pr-1 custom-scrollbar">
         {allTasks.map((task, i) => (
           <ServerNode key={'asis-' + task.id} task={task} mode="asis" index={i} />
         ))}
       </div>
 
-      {/* TO-BE 우측: 모든 태스크 (3열 배치) */}
-      <div className="absolute right-2 top-8 bottom-2 w-[360px] grid grid-cols-3 gap-1.5 content-start overflow-y-auto pl-1 custom-scrollbar">
+      {/* TO-BE 우측: 모든 태스크 (3열 배치, 라벨 아래로 조정) */}
+      <div className="absolute right-2 top-24 bottom-2 w-[360px] grid grid-cols-3 gap-1.5 content-start overflow-y-auto pl-1 custom-scrollbar">
         {allTasks.map((task, i) => (
           <ServerNode key={'tobe-' + task.id} task={task} mode="tobe" index={i} />
         ))}
