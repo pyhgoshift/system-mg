@@ -324,69 +324,103 @@ function DataMigrationVisual({ tasks, flowingTasks, tick }) {
 
       <svg className="absolute inset-0 w-full h-full" viewBox="0 0 1200 480" preserveAspectRatio="none">
         <defs>
-          {Object.entries(TASK_GROUPS).map(([key, g]) => (
-            <linearGradient key={key} id={`beam-${key}`} x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#94A3B8" stopOpacity="0.2" />
-              <stop offset="40%" stopColor={g.color} stopOpacity="0.9" />
-              <stop offset="100%" stopColor={g.color} stopOpacity="1" />
-            </linearGradient>
-          ))}
-          <radialGradient id="explosionGlow" cx="50%" cy="50%" r="50%">
+          <radialGradient id="coreGlow" cx="50%" cy="50%" r="50%">
             <stop offset="0%" stopColor="#FFFFFF" stopOpacity="1" />
-            <stop offset="20%" stopColor="#34D399" stopOpacity="0.9" />
-            <stop offset="50%" stopColor="#22D3EE" stopOpacity="0.5" />
-            <stop offset="100%" stopColor="#A78BFA" stopOpacity="0" />
+            <stop offset="15%" stopColor="#22D3EE" stopOpacity="0.9" />
+            <stop offset="40%" stopColor="#A78BFA" stopOpacity="0.4" />
+            <stop offset="100%" stopColor="#050818" stopOpacity="0" />
           </radialGradient>
           <filter id="glow">
-            <feGaussianBlur stdDeviation="3" result="b" />
+            <feGaussianBlur stdDeviation="4" result="b" />
+            <feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
+          </filter>
+          <filter id="intenseGlow">
+            <feGaussianBlur stdDeviation="8" result="b" />
             <feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
           </filter>
         </defs>
 
-        {Object.keys(TASK_GROUPS).map((key, idx) => {
-          const yStart = 100 + idx * 50;
-          const yEnd = 100 + idx * 50 + (idx % 2 === 0 ? -20 : 20);
-          const path = `M 280,${yStart} C 500,${yStart} 700,${yEnd} 920,${yEnd}`;
+        {/* 광섬유(Fiber Optic) 빔 이펙트 */}
+        {Array.from({ length: 28 }).map((_, i) => {
+          const yStart = 40 + i * 14;
+          const yEnd = 60 + (i % 10) * 35;
+          const cx1 = 400 + (i % 3) * 50;
+          const cx2 = 650 + (i % 2) * 50;
+          const path = `M 280,${yStart} C ${cx1},${yStart} ${cx2},240 850,240 C 880,240 900,${yEnd} 920,${yEnd}`;
+          
+          const isThick = i % 4 === 0;
+          const isFast = i % 3 === 0;
+          const colors = ['#22D3EE', '#A78BFA', '#34D399', '#FF5E9F', '#3B82F6'];
+          const color = colors[i % colors.length];
+          const duration = isFast ? 1.5 : 2.5 + (i % 3) * 0.5;
+          const delay = (i % 5) * -0.4;
+
           return (
-            <g key={key}>
-              <path d={path} stroke={`url(#beam-${key})`} strokeWidth="6" fill="none" opacity="0.3" filter="url(#glow)" />
-              <path d={path} stroke={`url(#beam-${key})`} strokeWidth="2" fill="none" opacity="0.9" />
-              {[0, 1, 2, 3].map(p => {
-                const t = ((tick * 0.015 + p * 0.25 + idx * 0.1) % 1);
-                const x = 280 + (920 - 280) * t;
-                const y = yStart + (yEnd - yStart) * t + Math.sin(t * Math.PI) * (idx % 2 === 0 ? -10 : 10);
-                return (
-                  <g key={p}>
-                    <circle cx={x} cy={y} r="6" fill={TASK_GROUPS[key].color} opacity="0.4" filter="url(#glow)" />
-                    <circle cx={x} cy={y} r="2.5" fill="#FFFFFF" opacity="0.95" />
-                  </g>
-                );
-              })}
+            <g key={i}>
+              {/* 베이스 흐릿한 라인 */}
+              <path d={path} stroke={color} strokeWidth={isThick ? 3 : 1} fill="none" opacity="0.15" />
+              
+              {/* 흐르는 빛 (Data flow) */}
+              <path 
+                d={path} 
+                stroke={color} 
+                strokeWidth={isThick ? 4 : 2} 
+                fill="none" 
+                opacity="0.8" 
+                filter={isThick ? "url(#intenseGlow)" : "url(#glow)"}
+                strokeDasharray={isThick ? "100 300" : "40 150"}
+                style={{
+                  animation: `flowLaser ${duration}s ${delay}s linear infinite`
+                }}
+              />
+              
+              {/* 보조 파티클 (빠르게 지나가는 닷) */}
+              <path 
+                d={path} 
+                stroke="#FFFFFF" 
+                strokeWidth={isThick ? 2 : 1} 
+                fill="none" 
+                opacity="0.9"
+                filter="url(#glow)"
+                strokeDasharray="4 400"
+                style={{
+                  animation: `flowLaser ${duration * 0.7}s ${delay}s linear infinite`
+                }}
+              />
             </g>
           );
         })}
 
-        <circle cx="940" cy="240" r="80" fill="url(#explosionGlow)">
-          <animate attributeName="r" values="60;100;60" dur="3s" repeatCount="indefinite" />
+        {/* 목적지 코어 발광 효과 (도착 지점 폭발) */}
+        <circle cx="850" cy="240" r="140" fill="url(#coreGlow)">
+          <animate attributeName="r" values="120;160;120" dur="2s" repeatCount="indefinite" />
+          <animate attributeName="opacity" values="0.7;1;0.7" dur="2s" repeatCount="indefinite" />
         </circle>
+        <circle cx="850" cy="240" r="30" fill="#FFFFFF" filter="url(#intenseGlow)" opacity="0.9">
+          <animate attributeName="r" values="25;35;25" dur="1s" repeatCount="indefinite" />
+        </circle>
+
+        {/* 중앙 집중 광선 (코어에서 뻗어나오는 빛) */}
         {[0, 45, 90, 135, 180, 225, 270, 315].map(angle => {
           const rad = (angle * Math.PI) / 180;
-          const x2 = 940 + Math.cos(rad) * 60;
-          const y2 = 240 + Math.sin(rad) * 60;
+          const x2 = 850 + Math.cos(rad) * 120;
+          const y2 = 240 + Math.sin(rad) * 120;
           return (
-            <line key={angle} x1="940" y1="240" x2={x2} y2={y2}
-              stroke="#34D399" strokeWidth="1.5" opacity="0.5">
-              <animate attributeName="opacity" values="0.2;0.8;0.2" dur="2s" repeatCount="indefinite" />
+            <line key={angle} x1="850" y1="240" x2={x2} y2={y2}
+              stroke="#22D3EE" strokeWidth="2" opacity="0.4" filter="url(#glow)">
+              <animate attributeName="opacity" values="0.1;0.6;0.1" dur="1.5s" begin={`${angle / 90}s`} repeatCount="indefinite" />
             </line>
           );
         })}
 
-        {Array.from({ length: 12 }).map((_, i) => {
-          const x = 320 + (i % 4) * 150;
-          const y = 80 + Math.floor(i / 4) * 130 + Math.sin(tick * 0.05 + i) * 5;
+        {/* 배경에 떠다니는 이진수 */}
+        {Array.from({ length: 15 }).map((_, i) => {
+          const x = 350 + (i % 5) * 120;
+          const y = 80 + Math.floor(i / 5) * 140 + Math.sin(tick * 0.05 + i) * 8;
           const text = ['010110', '110011', '001101', '101010', '011001', '110100'][i % 6];
           return (
-            <text key={i} x={x} y={y} fill="#22D3EE" fontSize="9" fontFamily="monospace" opacity="0.25">
+            <text key={i} x={x} y={y} fill="#A78BFA" fontSize="10" fontFamily="monospace" opacity="0.3"
+              style={{ textShadow: '0 0 5px rgba(167,139,250,0.5)' }}>
               {text}
             </text>
           );
@@ -897,6 +931,11 @@ function Styles() {
       @keyframes binaryFall {
         0% { transform: translateY(0); }
         100% { transform: translateY(200vh); }
+      }
+
+      @keyframes flowLaser {
+        from { stroke-dashoffset: 1000; }
+        to { stroke-dashoffset: 0; }
       }
     `}</style>
   );
