@@ -229,7 +229,7 @@ function Header({ now, stats, connStatus, lastSync }) {
       </div>
 
       {/* 헤드라인 - 에메랄드 그라디언트 (#34D399 → #22D3EE) */}
-      <h1 className="text-5xl md:text-6xl font-black tracking-tight leading-none" style={{
+      <h1 className="text-3xl md:text-4xl font-black tracking-tight leading-none" style={{
         background: 'linear-gradient(90deg, #34D399 0%, #22D3EE 50%, #34D399 100%)',
         backgroundSize: '200% auto',
         WebkitBackgroundClip: 'text',
@@ -239,7 +239,7 @@ function Header({ now, stats, connStatus, lastSync }) {
       }}>
         경기도교육청 중앙도서관
       </h1>
-      <h2 className="text-2xl md:text-3xl font-light tracking-[0.3em] mt-2 text-white/80">
+      <h2 className="text-xl md:text-2xl font-light tracking-[0.3em] mt-2 text-white/80">
         시스템 이전 실시간 모니터링
       </h2>
 
