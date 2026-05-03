@@ -341,75 +341,37 @@ function DataMigrationVisual({ tasks, flowingTasks, tick }) {
         </defs>
 
         {/* 광섬유(Fiber Optic) 빔 이펙트 */}
-        {Array.from({ length: 28 }).map((_, i) => {
-          const yStart = 40 + i * 14;
-          const yEnd = 60 + (i % 10) * 35;
+        {Array.from({ length: 24 }).map((_, i) => {
+          const yStart = 40 + i * 16;
+          const yEnd = 60 + (i % 8) * 45;
           const cx1 = 400 + (i % 3) * 50;
           const cx2 = 650 + (i % 2) * 50;
           const path = `M 280,${yStart} C ${cx1},${yStart} ${cx2},240 850,240 C 880,240 900,${yEnd} 920,${yEnd}`;
           
-          const isThick = i % 4 === 0;
-          const isFast = i % 3 === 0;
           const colors = ['#22D3EE', '#A78BFA', '#34D399', '#FF5E9F', '#3B82F6'];
           const color = colors[i % colors.length];
-          const duration = isFast ? 1.5 : 2.5 + (i % 3) * 0.5;
-          const delay = (i % 5) * -0.4;
+          const duration = 4; // 느리고 일정한 속도
+          const delay = (i / 24) * -4; // 골고루 퍼지도록 간격 조절
 
           return (
             <g key={i}>
               {/* 베이스 흐릿한 라인 */}
-              <path d={path} stroke={color} strokeWidth={isThick ? 3 : 1} fill="none" opacity="0.15" />
+              <path d={path} stroke={color} strokeWidth={2} fill="none" opacity="0.15" />
               
-              {/* 흐르는 빛 (Data flow) */}
+              {/* 일정한 간격으로 천천히 흐르는 데이터 빛 */}
               <path 
                 d={path} 
                 stroke={color} 
-                strokeWidth={isThick ? 4 : 2} 
+                strokeWidth={3} 
                 fill="none" 
-                opacity="0.8" 
-                filter={isThick ? "url(#intenseGlow)" : "url(#glow)"}
-                strokeDasharray={isThick ? "100 300" : "40 150"}
+                opacity="0.85" 
+                filter="url(#glow)"
+                strokeDasharray="60 180"
                 style={{
                   animation: `flowLaser ${duration}s ${delay}s linear infinite`
                 }}
               />
-              
-              {/* 보조 파티클 (빠르게 지나가는 닷) */}
-              <path 
-                d={path} 
-                stroke="#FFFFFF" 
-                strokeWidth={isThick ? 2 : 1} 
-                fill="none" 
-                opacity="0.9"
-                filter="url(#glow)"
-                strokeDasharray="4 400"
-                style={{
-                  animation: `flowLaser ${duration * 0.7}s ${delay}s linear infinite`
-                }}
-              />
             </g>
-          );
-        })}
-
-        {/* 목적지 코어 발광 효과 (도착 지점 폭발) */}
-        <circle cx="850" cy="240" r="140" fill="url(#coreGlow)">
-          <animate attributeName="r" values="120;160;120" dur="2s" repeatCount="indefinite" />
-          <animate attributeName="opacity" values="0.7;1;0.7" dur="2s" repeatCount="indefinite" />
-        </circle>
-        <circle cx="850" cy="240" r="30" fill="#FFFFFF" filter="url(#intenseGlow)" opacity="0.9">
-          <animate attributeName="r" values="25;35;25" dur="1s" repeatCount="indefinite" />
-        </circle>
-
-        {/* 중앙 집중 광선 (코어에서 뻗어나오는 빛) */}
-        {[0, 45, 90, 135, 180, 225, 270, 315].map(angle => {
-          const rad = (angle * Math.PI) / 180;
-          const x2 = 850 + Math.cos(rad) * 120;
-          const y2 = 240 + Math.sin(rad) * 120;
-          return (
-            <line key={angle} x1="850" y1="240" x2={x2} y2={y2}
-              stroke="#22D3EE" strokeWidth="2" opacity="0.4" filter="url(#glow)">
-              <animate attributeName="opacity" values="0.1;0.6;0.1" dur="1.5s" begin={`${angle / 90}s`} repeatCount="indefinite" />
-            </line>
           );
         })}
 
@@ -429,14 +391,14 @@ function DataMigrationVisual({ tasks, flowingTasks, tick }) {
 
       {/* AS-IS 좌측: 모든 태스크 */}
       <div className="absolute left-2 top-16 bottom-2 w-[260px] grid grid-cols-2 gap-2 content-start overflow-y-auto pr-1">
-        {allTasks.slice(0, 14).map((task, i) => (
+        {allTasks.map((task, i) => (
           <ServerNode key={'asis-' + task.id} task={task} mode="asis" index={i} />
         ))}
       </div>
 
       {/* TO-BE 우측: 모든 태스크 (동일) */}
       <div className="absolute right-2 top-16 bottom-2 w-[260px] grid grid-cols-2 gap-2 content-start overflow-y-auto pl-1">
-        {allTasks.slice(0, 14).map((task, i) => (
+        {allTasks.map((task, i) => (
           <ServerNode key={'tobe-' + task.id} task={task} mode="tobe" index={i} />
         ))}
       </div>
