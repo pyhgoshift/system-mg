@@ -123,19 +123,19 @@ export default function Dashboard() {
         <BinaryRain />
         <Header now={now} stats={stats} connStatus={connStatus} lastSync={lastSync} />
 
-      <div className="absolute top-22 left-8 z-30 hidden xl:block">
-        <div className="px-12 py-1 rounded-full backdrop-blur-md bg-slate-800/40 border border-slate-700/50">
-          <div className="flex items-baseline gap-3">
-            <div className="text-xl font-black text-slate-300">기존환경</div>
-            <div className="text-[10px] tracking-widest text-slate-500 font-bold">AS-IS</div>
+      <div className="absolute top-16 md:top-22 left-2 md:left-8 z-30 block">
+        <div className="px-3 md:px-12 py-0.5 md:py-1 rounded-full backdrop-blur-md bg-slate-800/40 border border-slate-700/50">
+          <div className="flex items-baseline gap-1 md:gap-3">
+            <div className="text-xs md:text-xl font-black text-slate-300">기존환경</div>
+            <div className="text-[6px] md:text-[10px] tracking-widest text-slate-500 font-bold uppercase">AS-IS</div>
           </div>
         </div>
       </div>
-      <div className="absolute top-22 right-8 z-30 hidden xl:block">
-        <div className="px-12 py-1 rounded-full backdrop-blur-md bg-emerald-500/10 border border-emerald-500/30">
-          <div className="flex items-baseline gap-3">
-            <div className="text-xl font-black text-emerald-400">신규환경</div>
-            <div className="text-[10px] tracking-widest text-emerald-500 font-bold">TO-BE</div>
+      <div className="absolute top-16 md:top-22 right-2 md:right-8 z-30 block">
+        <div className="px-3 md:px-12 py-0.5 md:py-1 rounded-full backdrop-blur-md bg-emerald-500/10 border border-emerald-500/30">
+          <div className="flex items-baseline gap-1 md:gap-3">
+            <div className="text-xs md:text-xl font-black text-emerald-400">신규환경</div>
+            <div className="text-[6px] md:text-[10px] tracking-widest text-emerald-500 font-bold uppercase">TO-BE</div>
           </div>
         </div>
       </div>
