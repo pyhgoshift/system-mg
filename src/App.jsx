@@ -218,13 +218,14 @@ function DataMigrationVisual({ tasks, flowingTasks, tick }) {
           </defs>
           {Array.from({ length: 60 }).map((_, i) => {
             const yStart = 20 + i * 8;
-            const yEnd = 240 + (i - 30) * 4.5; // 도착지 확산 범위를 3배 키움
-            const path = `M 200,${yStart} C 500,${yStart} 750,${yEnd} 1000,${yEnd}`;
+            const yEnd = 240 + (i - 30) * 4.5;
+            // S-곡선 경로: 중간 지점을 경유하도록 제어점 설정
+            const path = `M 200,${yStart} C 600,${yStart} 600,${yEnd} 1000,${yEnd}`;
             return (
               <React.Fragment key={i}>
-                <path d={path} stroke="url(#neonGrad)" strokeWidth={0.3 + (i % 3) * 0.5} fill="none" opacity={0.1 + (i % 5) * 0.05} markerEnd="url(#arrow)" />
-                <NeonPhoton key={`p1-${i}`} path={path} i={i} pIdx={0} tick={tick} />
-                <NeonPhoton key={`p2-${i}`} path={path} i={i} pIdx={1} tick={tick} />
+                <path d={path} stroke="url(#neonGrad)" strokeWidth={0.2 + (i % 3) * 0.4} fill="none" opacity={0.05 + (i % 5) * 0.05} markerEnd="url(#arrow)" />
+                <NeonPhoton key={`p1-${i}`} i={i} pIdx={0} tick={tick} />
+                <NeonPhoton key={`p2-${i}`} i={i} pIdx={1} tick={tick} />
               </React.Fragment>
             );
           })}
@@ -258,30 +259,31 @@ function DataMigrationVisual({ tasks, flowingTasks, tick }) {
   );
 }
 
-function NeonPhoton({ path, i, pIdx, tick }) {
-  const progress = ((tick * (1.5 + i * 0.1) + pIdx * 50) % 100) / 100;
+function NeonPhoton({ i, pIdx, tick }) {
+  const progress = ((tick * (1.2 + i * 0.08) + pIdx * 50) % 100) / 100;
   const x = 200 + (1000 - 200) * progress;
-  // 가짜 곡선 위치 계산
   const t = progress;
   const yStart = 20 + i * 8;
-  const yEnd = 240 + (i - 30) * 4.5; // 도착지 확산 범위를 3배 키움
-  const cy1 = yStart, cy2 = yEnd;
-  const y = Math.pow(1-t, 3)*yStart + 3*Math.pow(1-t, 2)*t*cy1 + 3*(1-t)*Math.pow(t, 2)*cy2 + Math.pow(t, 3)*yEnd;
+  const yEnd = 240 + (i - 30) * 4.5;
+  // S-곡선 계산 (Cubic Bezier: p0, c1, c2, p3)
+  const y = Math.pow(1-t, 3)*yStart + 3*Math.pow(1-t, 2)*t*yStart + 3*(1-t)*Math.pow(t, 2)*yEnd + Math.pow(t, 3)*yEnd;
 
-  // 오른쪽으로 갈수록 강해지는 광자
-  const intensity = 0.2 + progress * 0.8;
+  // 오른쪽으로 갈수록 훨씬 강렬해지는 광자 (강조 3배)
+  const intensity = Math.pow(progress, 2) * 1.5 + 0.1;
 
   return (
-    <circle cx={x} cy={y} r={1.5 + intensity * 2} fill={i % 2 === 0 ? '#A78BFA' : '#22D3EE'} style={{
-      filter: `drop-shadow(0 0 ${intensity * 15}px ${i % 2 === 0 ? '#A78BFA' : '#22D3EE'})`,
+    <circle cx={x} cy={y} r={1 + intensity * 3} fill={i % 2 === 0 ? '#A78BFA' : '#22D3EE'} style={{
+      filter: `drop-shadow(0 0 ${intensity * 25}px ${i % 2 === 0 ? '#A78BFA' : '#22D3EE'})`,
       opacity: intensity
     }} />
   );
 }
 
 function FloatingTaskLabel({ task, index, tick }) {
-  const x = 1000 + (Math.sin(tick * 0.02 + index) * 30); // 아예 오른쪽(TO-BE) 구역으로 완전히 이동
-  const y = 240 + (Math.cos(tick * 0.02 + index) * 50); 
+  // 겹치지 않도록 index에 따라 Y 위치를 확실히 분산 (상/중/하 분할)
+  const yBase = 240 + (index % 3 - 1) * 120; 
+  const x = 950 + (Math.sin(tick * 0.02 + index) * 40); 
+  const y = yBase + (Math.cos(tick * 0.02 + index) * 30); 
   return (
     <div className="absolute px-6 py-2 rounded-full border-2 border-emerald-400/80 bg-black/95 backdrop-blur-3xl shadow-[0_0_50px_rgba(52,211,153,0.6)] flex items-center gap-4 transition-all duration-1000 z-50"
       style={{ left: x, top: y, transform: 'translate(-50%, -50%)' }}>
