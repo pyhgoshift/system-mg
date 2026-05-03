@@ -223,8 +223,8 @@ function DataMigrationVisual({ tasks, flowingTasks, tick }) {
           {Array.from({ length: 60 }).map((_, i) => {
             const yStart = 20 + i * 8;
             const yEnd = 240 + (i - 30) * 4.5;
-            // 좌측 시프트 적용 (50 -> 1000)
-            const path = `M 50,${yStart} C 700,${yStart} 300,${yEnd} 1000,${yEnd}`;
+            // 오른쪽 영역 침범 방지를 위해 종착지를 850으로 과감히 압축
+            const path = `M 50,${yStart} C 500,${yStart} 300,${yEnd} 850,${yEnd}`;
             return (
               <React.Fragment key={i}>
                 <path d={path} stroke="url(#neonGrad)" strokeWidth={2.5 + (i % 3) * 1.5} fill="none" opacity={0.3 + (i % 5) * 0.1} markerEnd="url(#arrow)" style={{ filter: 'drop-shadow(0 0 35px rgba(52,211,153,0.8))' }} />
@@ -257,8 +257,8 @@ function DataMigrationVisual({ tasks, flowingTasks, tick }) {
 
 function NeonPhoton({ i, pIdx, tick }) {
   const progress = ((tick * (0.9 + i * 0.03) + pIdx * 33) % 100) / 100;
-  // 좌측 시프트 시스템에 맞춰 X축 이동 거리 재계산 (50 -> 1000)
-  const x = 50 + (1000 - 50) * progress;
+  // 압축된 시스템에 맞춰 X축 이동 거리 재계산 (50 -> 850)
+  const x = 50 + (850 - 50) * progress;
   const t = progress;
   const yStart = 20 + i * 8;
   const yEnd = 240 + (i - 30) * 4.5;
@@ -280,8 +280,8 @@ function NeonPhoton({ i, pIdx, tick }) {
 
 function FloatingTaskLabel({ task, index, tick }) {
   const yBase = 240 + (index % 3 - 1) * 120; 
-  // 좌측 시프트 시스템의 도착지(1000) 근처로 라벨 위치 조정
-  const x = 950 + (Math.sin(tick * 0.02 + index) * 40); 
+  // 압축된 시스템의 도착지(850) 근처로 라벨 위치 조정
+  const x = 800 + (Math.sin(tick * 0.02 + index) * 40); 
   const y = yBase + (Math.cos(tick * 0.02 + index) * 30); 
   return (
     <div className="absolute px-3 md:px-6 py-1 md:py-2 rounded-full border-2 border-emerald-400/80 bg-black/95 backdrop-blur-3xl shadow-[0_0_50px_rgba(52,211,153,0.6)] flex items-center gap-2 md:gap-4 transition-all duration-1000 z-50 whitespace-nowrap scale-75 md:scale-100"
