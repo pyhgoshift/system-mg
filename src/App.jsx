@@ -373,7 +373,7 @@ function DataMigrationVisual({ tasks, flowingTasks, tick }) {
         }}>
           <div className="flex items-baseline gap-3">
             <div className="text-xl font-black tracking-tighter text-slate-300">AS-IS</div>
-            <div className="text-[9px] tracking-widest text-slate-400 uppercase opacity-70">Legacy</div>
+            <div className="text-[10px] tracking-widest text-slate-400 font-bold">기존환경</div>
           </div>
         </div>
       </div>
@@ -389,7 +389,7 @@ function DataMigrationVisual({ tasks, flowingTasks, tick }) {
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent'
             }}>TO-BE</div>
-            <div className="text-[9px] tracking-widest text-emerald-300 uppercase opacity-70">Target</div>
+            <div className="text-[10px] tracking-widest text-emerald-300 font-bold">신규환경</div>
           </div>
         </div>
       </div>
