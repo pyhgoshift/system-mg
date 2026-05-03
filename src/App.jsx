@@ -213,13 +213,13 @@ function DataMigrationVisual({ tasks, flowingTasks, tick }) {
               <stop offset="100%" stopColor="#34D399" stopOpacity="0.9" />
             </linearGradient>
           </defs>
-          {Array.from({ length: 30 }).map((_, i) => {
-            const yStart = 40 + i * 14;
-            const yEnd = 240 + (i - 15) * 2.5;
+          {Array.from({ length: 60 }).map((_, i) => {
+            const yStart = 20 + i * 8;
+            const yEnd = 240 + (i - 30) * 1.5;
             const path = `M 200,${yStart} C 500,${yStart} 750,${yEnd} 1000,${yEnd}`;
             return (
               <React.Fragment key={i}>
-                <path d={path} stroke="url(#neonGrad)" strokeWidth={0.5 + (i % 3)} fill="none" opacity={0.15 + (i % 5) * 0.05} />
+                <path d={path} stroke="url(#neonGrad)" strokeWidth={0.3 + (i % 3) * 0.5} fill="none" opacity={0.1 + (i % 5) * 0.05} />
                 <NeonPhoton key={`p1-${i}`} path={path} i={i} pIdx={0} tick={tick} />
                 <NeonPhoton key={`p2-${i}`} path={path} i={i} pIdx={1} tick={tick} />
               </React.Fragment>
@@ -277,13 +277,13 @@ function NeonPhoton({ path, i, pIdx, tick }) {
 }
 
 function FloatingTaskLabel({ task, index, tick }) {
-  const x = 400 + (index * 100) + Math.sin(tick * 0.05 + index) * 30;
-  const y = 120 + (index * 70) + Math.cos(tick * 0.05 + index) * 30;
+  const x = 350 + (index * 120) + Math.sin(tick * 0.04 + index) * 40;
+  const y = 200 + (index * 20) + Math.cos(tick * 0.04 + index) * 40; // 흐름 중앙부로 집중
   return (
-    <div className="absolute px-5 py-2 rounded-xl border-2 border-cyan-400/40 bg-black/60 backdrop-blur-xl shadow-[0_0_25px_rgba(34,211,238,0.2)] flex items-center gap-3 transition-all duration-1000"
+    <div className="absolute px-5 py-1.5 rounded-full border-2 border-cyan-400/60 bg-black/80 backdrop-blur-2xl shadow-[0_0_30px_rgba(34,211,238,0.4)] flex items-center gap-3 transition-all duration-1000 z-50"
       style={{ left: x, top: y }}>
-      <div className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse" />
-      <span className="text-[10px] font-black text-cyan-300 uppercase tracking-tighter">TASK-{task.id}</span>
+      <div className="w-2.5 h-2.5 rounded-full bg-cyan-400 shadow-[0_0_10px_#22D3EE] animate-pulse" />
+      <span className="text-[11px] font-black text-cyan-200 uppercase tracking-widest">SYNC: {task.id}</span>
     </div>
   );
 }
@@ -328,23 +328,22 @@ function CapsuleGauges({ tasks }) {
   }, [tasks]);
 
   return (
-    <div className="mt-16 px-8">
-      <div className="text-center text-xl font-black tracking-[0.6em] text-white/70 mb-10 uppercase">6단계 공정별 실시간 진척도</div>
-      <div className="grid grid-cols-6 gap-8">
+    <div className="mt-8 px-8">
+      <div className="text-center text-sm font-black tracking-[0.8em] text-white/50 mb-6 uppercase">6단계 공정별 마이그레이션 진척</div>
+      <div className="grid grid-cols-6 gap-4">
         {Object.entries(TASK_GROUPS).map(([key, g]) => {
           const d = byGroup[key];
           return (
-            <div key={key} className="p-8 rounded-[3rem] bg-white/5 border border-white/10 text-center backdrop-blur-2xl">
-              <div className="flex flex-col gap-2 mb-6">
-                <span className="text-xl font-black uppercase tracking-widest" style={{ color: g.color }}>{g.label}</span>
-                <span className="text-3xl font-black tabular-nums" style={{ color: g.color }}>{d.pct}%</span>
+            <div key={key} className="p-4 rounded-[2rem] bg-white/5 border border-white/10 text-center backdrop-blur-xl relative overflow-hidden">
+              <div className="flex flex-col gap-1 mb-3">
+                <span className="text-[11px] font-black uppercase tracking-widest opacity-60" style={{ color: g.color }}>{g.label}</span>
+                <span className="text-2xl font-black tabular-nums" style={{ color: g.color }}>{d.pct}%</span>
               </div>
-              <div className="h-14 rounded-full bg-black/50 border border-white/10 overflow-hidden p-2">
+              <div className="h-6 rounded-full bg-black/40 border border-white/5 overflow-hidden p-1">
                 <div className="h-full rounded-full transition-all duration-1000" style={{
-                  width: `${d.pct}%`, background: `linear-gradient(90deg, ${g.color}80, ${g.color})`, boxShadow: `0 0 40px ${g.color}`
+                  width: `${d.pct}%`, background: `linear-gradient(90deg, ${g.color}60, ${g.color})`, boxShadow: `0 0 20px ${g.color}40`
                 }} />
               </div>
-              <div className="text-sm text-white/40 mt-6 font-black uppercase tracking-[0.2em]">{d.done} / {d.total} SUCCESS</div>
             </div>
           );
         })}
@@ -404,10 +403,10 @@ function Styles() {
       @keyframes binaryFall { 0% { transform: translateY(0); } 100% { transform: translateY(120vh); } }
       @keyframes nodeBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
       .node-blink { 
-        animation: nodeBlink 0.8s infinite !important;
-        background: rgba(251, 191, 36, 0.5) !important;
+        animation: nodeBlink 1.6s infinite !important;
+        background: rgba(251, 191, 36, 0.4) !important;
         border-color: #FBBF24 !important;
-        box-shadow: 0 0 25px rgba(251, 191, 36, 0.3) !important;
+        box-shadow: 0 0 25px rgba(251, 191, 36, 0.2) !important;
         z-index: 50;
         position: relative;
       }
