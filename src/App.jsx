@@ -208,9 +208,9 @@ function DataMigrationVisual({ tasks, flowingTasks, tick }) {
         <svg className="absolute inset-0 w-full h-full" viewBox="0 0 1200 480">
           <defs>
             <linearGradient id="neonGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#A78BFA" stopOpacity="0" />
-              <stop offset="50%" stopColor="#22D3EE" stopOpacity="0.8" />
-              <stop offset="100%" stopColor="#34D399" stopOpacity="0" />
+              <stop offset="0%" stopColor="#A78BFA" stopOpacity="0.05" />
+              <stop offset="40%" stopColor="#22D3EE" stopOpacity="0.4" />
+              <stop offset="100%" stopColor="#34D399" stopOpacity="0.9" />
             </linearGradient>
           </defs>
           {Array.from({ length: 30 }).map((_, i) => {
@@ -219,7 +219,7 @@ function DataMigrationVisual({ tasks, flowingTasks, tick }) {
             const path = `M 200,${yStart} C 500,${yStart} 750,${yEnd} 1000,${yEnd}`;
             return (
               <React.Fragment key={i}>
-                <path d={path} stroke="url(#neonGrad)" strokeWidth="1" fill="none" opacity="0.25" />
+                <path d={path} stroke="url(#neonGrad)" strokeWidth={0.5 + (i % 3)} fill="none" opacity={0.15 + (i % 5) * 0.05} />
                 <NeonPhoton key={`p1-${i}`} path={path} i={i} pIdx={0} tick={tick} />
                 <NeonPhoton key={`p2-${i}`} path={path} i={i} pIdx={1} tick={tick} />
               </React.Fragment>
@@ -257,18 +257,21 @@ function DataMigrationVisual({ tasks, flowingTasks, tick }) {
 
 function NeonPhoton({ path, i, pIdx, tick }) {
   const progress = ((tick * (1.5 + i * 0.1) + pIdx * 50) % 100) / 100;
-  const x = 250 + (950 - 250) * progress;
-  // 가짜 곡선 위치 계산 (Cubic Bezier 근사치)
+  const x = 200 + (1000 - 200) * progress;
+  // 가짜 곡선 위치 계산
   const t = progress;
-  const cx1 = 500, cx2 = 750;
-  const cy1 = 60 + i * 25, cy2 = 240 + (i - 7) * 4;
-  const yStart = 60 + i * 25, yEnd = 240 + (i - 7) * 4;
+  const yStart = 40 + i * 14;
+  const yEnd = 240 + (i - 15) * 2.5;
+  const cy1 = yStart, cy2 = yEnd;
   const y = Math.pow(1-t, 3)*yStart + 3*Math.pow(1-t, 2)*t*cy1 + 3*(1-t)*Math.pow(t, 2)*cy2 + Math.pow(t, 3)*yEnd;
 
+  // 오른쪽으로 갈수록 강해지는 광자
+  const intensity = 0.2 + progress * 0.8;
+
   return (
-    <circle cx={x} cy={y} r="2.5" fill={i % 2 === 0 ? '#A78BFA' : '#22D3EE'} style={{
-      filter: `drop-shadow(0 0 10px ${i % 2 === 0 ? '#A78BFA' : '#22D3EE'})`,
-      opacity: 1 - Math.abs(0.5 - progress) * 2
+    <circle cx={x} cy={y} r={1.5 + intensity * 2} fill={i % 2 === 0 ? '#A78BFA' : '#22D3EE'} style={{
+      filter: `drop-shadow(0 0 ${intensity * 15}px ${i % 2 === 0 ? '#A78BFA' : '#22D3EE'})`,
+      opacity: intensity
     }} />
   );
 }
@@ -293,12 +296,15 @@ function ServerNode({ task, mode, index }) {
   const active = isAsIs ? (task.status === 'wait') : done;
   const deactivated = isAsIs ? done : (task.status === 'wait');
 
+  const isDoneTobe = !isAsIs && done;
+
   return (
     <div className={`p-2 rounded-lg border transition-all duration-500 ${blinking ? 'node-blink' : ''}`}
       style={{
-        background: deactivated ? 'rgba(15,23,42,0.6)' : active ? `${g.color}15` : 'rgba(15,23,42,0.8)',
-        borderColor: deactivated ? 'rgba(255,255,255,0.05)' : blinking ? '#FBBF24' : `${g.color}40`,
-        opacity: deactivated ? 0.4 : 1
+        background: isDoneTobe ? 'rgba(59, 130, 246, 0.5)' : deactivated ? 'rgba(15,23,42,0.6)' : active ? `${g.color}15` : 'rgba(15,23,42,0.8)',
+        borderColor: isDoneTobe ? '#3B82F6' : deactivated ? 'rgba(255,255,255,0.05)' : blinking ? '#FBBF24' : `${g.color}40`,
+        opacity: deactivated ? 0.4 : 1,
+        boxShadow: isDoneTobe ? '0 0 15px rgba(59, 130, 246, 0.3)' : 'none'
       }}>
       <div className="flex justify-between items-center mb-1">
         <span className="text-[9px] font-mono" style={{ color: deactivated ? '#444' : g.color }}>{task.id}</span>
@@ -322,23 +328,23 @@ function CapsuleGauges({ tasks }) {
   }, [tasks]);
 
   return (
-    <div className="mt-12 px-8">
-      <div className="text-center text-sm font-black tracking-[0.6em] text-white/70 mb-8 uppercase">6단계 공정별 실시간 진척도</div>
+    <div className="mt-16 px-8">
+      <div className="text-center text-xl font-black tracking-[0.6em] text-white/70 mb-10 uppercase">6단계 공정별 실시간 진척도</div>
       <div className="grid grid-cols-6 gap-8">
         {Object.entries(TASK_GROUPS).map(([key, g]) => {
           const d = byGroup[key];
           return (
-            <div key={key} className="p-6 rounded-[2.5rem] bg-white/5 border border-white/10 text-center backdrop-blur-2xl">
-              <div className="flex justify-between items-end mb-4 px-2">
-                <span className="text-base font-black uppercase tracking-tighter" style={{ color: g.color }}>{g.label}</span>
-                <span className="text-5xl font-black tabular-nums" style={{ color: g.color }}>{d.pct}%</span>
+            <div key={key} className="p-8 rounded-[3rem] bg-white/5 border border-white/10 text-center backdrop-blur-2xl">
+              <div className="flex flex-col gap-2 mb-6">
+                <span className="text-xl font-black uppercase tracking-widest" style={{ color: g.color }}>{g.label}</span>
+                <span className="text-7xl font-black tabular-nums" style={{ color: g.color }}>{d.pct}%</span>
               </div>
-              <div className="h-10 rounded-full bg-black/50 border border-white/10 overflow-hidden p-1.5">
+              <div className="h-14 rounded-full bg-black/50 border border-white/10 overflow-hidden p-2">
                 <div className="h-full rounded-full transition-all duration-1000" style={{
-                  width: `${d.pct}%`, background: `linear-gradient(90deg, ${g.color}80, ${g.color})`, boxShadow: `0 0 30px ${g.color}`
+                  width: `${d.pct}%`, background: `linear-gradient(90deg, ${g.color}80, ${g.color})`, boxShadow: `0 0 40px ${g.color}`
                 }} />
               </div>
-              <div className="text-[11px] text-white/40 mt-5 font-black uppercase tracking-[0.2em]">{d.done} / {d.total} SUCCESS</div>
+              <div className="text-sm text-white/40 mt-6 font-black uppercase tracking-[0.2em]">{d.done} / {d.total} SUCCESS</div>
             </div>
           );
         })}
