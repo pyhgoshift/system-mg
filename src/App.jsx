@@ -154,17 +154,17 @@ export default function Dashboard() {
 function Header({ now, stats, connStatus, lastSync }) {
   const time = now.toLocaleTimeString('ko-KR', { hour12: false });
   return (
-    <header className="relative pt-10 pb-6 px-10 text-center z-40">
-      <div className="flex items-center justify-center gap-4 mb-4 text-sm">
-        <div className="px-3 py-1 rounded bg-white/10 text-[10px] font-black tracking-tighter">v1.3</div>
+    <header className="relative pt-4 pb-2 px-10 text-center z-40">
+      <div className="flex items-center justify-center gap-4 mb-2 text-sm">
+        <div className="px-3 py-1 rounded bg-white/10 text-[10px] font-black tracking-tighter">v1.7</div>
         <div className="w-3 h-3 rounded-full bg-rose-500 animate-pulse shadow-[0_0_15px_rgba(244,63,94,0.8)]" />
-        <span className="text-rose-300 font-black tracking-[0.5em] text-sm">LIVE MONITORING</span>
+        <span className="text-rose-300 font-black tracking-[0.5em] text-xs">LIVE MONITORING</span>
         <span className="text-white/30">·</span>
-        <span className="text-white/80 font-black text-lg tabular-nums tracking-widest">{time}</span>
+        <span className="text-white/80 font-black text-base tabular-nums tracking-widest">{time}</span>
         <span className="text-white/30">·</span>
-        <span className="font-black uppercase text-sm tracking-widest" style={{ color: connStatus === 'connected' ? '#34D399' : '#FBBF24' }}>{connStatus}</span>
+        <span className="font-black uppercase text-xs tracking-widest" style={{ color: connStatus === 'connected' ? '#34D399' : '#FBBF24' }}>{connStatus}</span>
       </div>
-      <h1 className="text-5xl font-black tracking-tight mb-8" style={{
+      <h1 className="text-4xl font-black tracking-tight mb-4" style={{
         background: 'linear-gradient(90deg, #A78BFA, #22D3EE, #34D399)',
         backgroundSize: '200% auto',
         WebkitBackgroundClip: 'text',
@@ -172,16 +172,16 @@ function Header({ now, stats, connStatus, lastSync }) {
         animation: 'titleShine 8s linear infinite'
       }}>경기도교육청 중앙도서관 이전 통합 모니터링</h1>
       
-      <div className="flex items-center justify-center gap-16">
-        <div className="text-center">
-          <div className="text-xs text-white/40 mb-2 uppercase tracking-[0.3em] font-black">Overall Progress</div>
-          <div className="text-7xl font-black text-emerald-400 drop-shadow-[0_0_30px_rgba(52,211,153,0.4)]">{stats.overall}%</div>
+      <div className="flex items-center justify-center gap-12">
+        <div className="flex items-center gap-4">
+          <div className="text-[10px] text-white/40 uppercase tracking-[0.2em] font-black">Overall</div>
+          <div className="text-5xl font-black text-emerald-400 drop-shadow-[0_0_20px_rgba(52,211,153,0.3)]">{stats.overall}%</div>
         </div>
-        <div className="w-px h-20 bg-white/10" />
-        <div className="flex gap-12">
-          <StatMini label="완료" value={stats.done} color="#34D399" size="text-4xl" />
-          <StatMini label="진행" value={stats.prog} color="#FBBF24" size="text-4xl" />
-          <StatMini label="대기" value={stats.wait} color="#64748B" size="text-4xl" />
+        <div className="w-px h-10 bg-white/10" />
+        <div className="flex gap-8">
+          <StatMini label="완료" value={stats.done} color="#34D399" size="text-2xl" />
+          <StatMini label="진행" value={stats.prog} color="#FBBF24" size="text-2xl" />
+          <StatMini label="대기" value={stats.wait} color="#64748B" size="text-2xl" />
         </div>
       </div>
     </header>
@@ -244,11 +244,11 @@ function DataMigrationVisual({ tasks, flowingTasks, tick }) {
         </div>
       </div>
 
-      {/* 태스크 그리드 (사이드) */}
-      <div className="absolute left-2 top-2 bottom-2 w-[430px] grid grid-cols-3 gap-1 content-start overflow-y-auto no-scrollbar z-20">
+      {/* 태스크 그리드 (최상단 밀착) */}
+      <div className="absolute left-2 top-0 bottom-2 w-[430px] grid grid-cols-3 gap-1 content-start overflow-y-auto no-scrollbar z-20">
         {tasks.map((t, i) => <ServerNode key={'asis-'+t.id} task={t} mode="asis" index={i} />)}
       </div>
-      <div className="absolute right-2 top-2 bottom-2 w-[430px] grid grid-cols-3 gap-1 content-start overflow-y-auto no-scrollbar z-20">
+      <div className="absolute right-2 top-0 bottom-2 w-[430px] grid grid-cols-3 gap-1 content-start overflow-y-auto no-scrollbar z-20">
         {tasks.map((t, i) => <ServerNode key={'tobe-'+t.id} task={t} mode="tobe" index={i} />)}
       </div>
     </div>
