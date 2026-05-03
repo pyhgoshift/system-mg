@@ -154,44 +154,45 @@ export default function Dashboard() {
 function Header({ now, stats, connStatus, lastSync }) {
   const time = now.toLocaleTimeString('ko-KR', { hour12: false });
   return (
-    <header className="relative pt-8 pb-4 px-6 text-center z-40">
-      <div className="flex items-center justify-center gap-3 mb-3 text-xs">
-        <div className="px-2 py-0.5 rounded bg-white/10 text-[8px] font-black tracking-tighter">v1.2</div>
-        <div className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
-        <span className="text-rose-300 font-bold tracking-[0.4em]">LIVE MONITORING</span>
+    <header className="relative pt-10 pb-6 px-10 text-center z-40">
+      <div className="flex items-center justify-center gap-4 mb-4 text-sm">
+        <div className="px-3 py-1 rounded bg-white/10 text-[10px] font-black tracking-tighter">v1.3</div>
+        <div className="w-3 h-3 rounded-full bg-rose-500 animate-pulse shadow-[0_0_15px_rgba(244,63,94,0.8)]" />
+        <span className="text-rose-300 font-black tracking-[0.5em] text-sm">LIVE MONITORING</span>
         <span className="text-white/30">·</span>
-        <span className="text-white/60">{time}</span>
+        <span className="text-white/80 font-black text-lg tabular-nums tracking-widest">{time}</span>
         <span className="text-white/30">·</span>
-        <span className="font-bold uppercase" style={{ color: connStatus === 'connected' ? '#34D399' : '#FBBF24' }}>{connStatus}</span>
+        <span className="font-black uppercase text-sm tracking-widest" style={{ color: connStatus === 'connected' ? '#34D399' : '#FBBF24' }}>{connStatus}</span>
       </div>
-      <h1 className="text-4xl font-black tracking-tight" style={{
+      <h1 className="text-5xl font-black tracking-tight mb-8" style={{
         background: 'linear-gradient(90deg, #A78BFA, #22D3EE, #34D399)',
         backgroundSize: '200% auto',
         WebkitBackgroundClip: 'text',
         WebkitTextFillColor: 'transparent',
         animation: 'titleShine 8s linear infinite'
       }}>경기도교육청 중앙도서관 이전 통합 모니터링</h1>
-      <div className="mt-4 flex items-center justify-center gap-8">
+      
+      <div className="flex items-center justify-center gap-16">
         <div className="text-center">
-          <div className="text-[10px] text-white/40 mb-1 uppercase tracking-widest">Global Progress</div>
-          <div className="text-5xl font-black text-emerald-400">{stats.overall}%</div>
+          <div className="text-xs text-white/40 mb-2 uppercase tracking-[0.3em] font-black">Overall Progress</div>
+          <div className="text-7xl font-black text-emerald-400 drop-shadow-[0_0_30px_rgba(52,211,153,0.4)]">{stats.overall}%</div>
         </div>
-        <div className="w-px h-12 bg-white/10" />
-        <div className="flex gap-6">
-          <StatMini label="완료" value={stats.done} color="#34D399" />
-          <StatMini label="진행" value={stats.prog} color="#FBBF24" />
-          <StatMini label="대기" value={stats.wait} color="#64748B" />
+        <div className="w-px h-20 bg-white/10" />
+        <div className="flex gap-12">
+          <StatMini label="완료" value={stats.done} color="#34D399" size="text-4xl" />
+          <StatMini label="진행" value={stats.prog} color="#FBBF24" size="text-4xl" />
+          <StatMini label="대기" value={stats.wait} color="#64748B" size="text-4xl" />
         </div>
       </div>
     </header>
   );
 }
 
-function StatMini({ label, value, color }) {
+function StatMini({ label, value, color, size = "text-2xl" }) {
   return (
     <div className="text-center">
-      <div className="text-[10px] text-white/40 mb-1 tracking-widest">{label}</div>
-      <div className="text-xl font-black" style={{ color }}>{value}</div>
+      <div className="text-sm text-white/50 mb-2 tracking-[0.3em] font-black">{label}</div>
+      <div className={`${size} font-black drop-shadow-md`} style={{ color }}>{value}</div>
     </div>
   );
 }
@@ -212,13 +213,13 @@ function DataMigrationVisual({ tasks, flowingTasks, tick }) {
               <stop offset="100%" stopColor="#34D399" stopOpacity="0" />
             </linearGradient>
           </defs>
-          {Array.from({ length: 15 }).map((_, i) => {
-            const yStart = 60 + i * 25;
-            const yEnd = 240 + (i - 7) * 4;
-            const path = `M 250,${yStart} C 500,${yStart} 750,${yEnd} 950,${yEnd}`;
+          {Array.from({ length: 30 }).map((_, i) => {
+            const yStart = 40 + i * 14;
+            const yEnd = 240 + (i - 15) * 2.5;
+            const path = `M 200,${yStart} C 500,${yStart} 750,${yEnd} 1000,${yEnd}`;
             return (
               <React.Fragment key={i}>
-                <path d={path} stroke="url(#neonGrad)" strokeWidth="1.5" fill="none" opacity="0.4" />
+                <path d={path} stroke="url(#neonGrad)" strokeWidth="1" fill="none" opacity="0.25" />
                 <NeonPhoton key={`p1-${i}`} path={path} i={i} pIdx={0} tick={tick} />
                 <NeonPhoton key={`p2-${i}`} path={path} i={i} pIdx={1} tick={tick} />
               </React.Fragment>
