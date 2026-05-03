@@ -19,9 +19,6 @@ const TASK_GROUPS = {
   G8: { label: '전환 종료',    sub: '종료 선언 / 공지 제거',     color: '#FB923C', glow: 'rgba(251,146,60,0.7)' }
 };
 
-// ============================
-// 데모 태스크 (실제 시트 구조 반영)
-// ============================
 const DEMO_TASKS = [
   { id: '311', name: '3.11 작업시작 선언', group: 'G3', status: 'done', progress: 100 },
   { id: '312', name: '3.12 Web방화벽 공지등록', group: 'G3', status: 'done', progress: 100 },
@@ -101,7 +98,6 @@ export default function Dashboard() {
   const dnsReady = dnsTask && dnsTask.status === 'done';
   const urlTasks = tasks.filter(t => t.isUrlCheck).sort((a, b) => Number(a.id) - Number(b.id));
   const flowingTasks = tasks.filter(t => t.status === 'progress');
-  const doneTasks = tasks.filter(t => t.status === 'done');
 
   const handleUrlClick = (id) => {
     if (!dnsReady || verifiedUrls.has(id) || verifyingId) return;
@@ -126,7 +122,6 @@ export default function Dashboard() {
       <BinaryRain />
       <Header now={now} stats={stats} connStatus={connStatus} lastSync={lastSync} />
 
-      {/* AS-IS/TO-BE 상단 라벨 */}
       <div className="absolute top-22 left-8 z-30 hidden xl:block">
         <div className="px-12 py-1 rounded-full backdrop-blur-md bg-slate-800/40 border border-slate-700/50">
           <div className="flex items-baseline gap-3">
@@ -161,6 +156,7 @@ function Header({ now, stats, connStatus, lastSync }) {
   return (
     <header className="relative pt-8 pb-4 px-6 text-center z-40">
       <div className="flex items-center justify-center gap-3 mb-3 text-xs">
+        <div className="px-2 py-0.5 rounded bg-white/10 text-[8px] font-black tracking-tighter">v1.2</div>
         <div className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
         <span className="text-rose-300 font-bold tracking-[0.4em]">LIVE MONITORING</span>
         <span className="text-white/30">·</span>
@@ -169,15 +165,15 @@ function Header({ now, stats, connStatus, lastSync }) {
         <span className="font-bold uppercase" style={{ color: connStatus === 'connected' ? '#34D399' : '#FBBF24' }}>{connStatus}</span>
       </div>
       <h1 className="text-4xl font-black tracking-tight" style={{
-        background: 'linear-gradient(90deg, #34D399, #22D3EE, #34D399)',
+        background: 'linear-gradient(90deg, #A78BFA, #22D3EE, #34D399)',
         backgroundSize: '200% auto',
         WebkitBackgroundClip: 'text',
         WebkitTextFillColor: 'transparent',
         animation: 'titleShine 8s linear infinite'
-      }}>경기도교육청 중앙도서관</h1>
+      }}>경기도교육청 중앙도서관 이전 통합 모니터링</h1>
       <div className="mt-4 flex items-center justify-center gap-8">
         <div className="text-center">
-          <div className="text-[10px] text-white/40 mb-1 uppercase tracking-widest">Progress</div>
+          <div className="text-[10px] text-white/40 mb-1 uppercase tracking-widest">Global Progress</div>
           <div className="text-5xl font-black text-emerald-400">{stats.overall}%</div>
         </div>
         <div className="w-px h-12 bg-white/10" />
@@ -202,69 +198,52 @@ function StatMini({ label, value, color }) {
 
 function DataMigrationVisual({ tasks, flowingTasks, tick }) {
   const doneTasks = tasks.filter(t => t.status === 'done');
-  const totalCount = tasks.length;
   
   return (
+    <div className="relative h-[480px]">
+      {/* 미래형 네온 비주얼 배경 */}
       <div className="absolute inset-0 z-10 overflow-hidden pointer-events-none">
-        {/* 그리드 배경 */}
         <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, rgba(34,211,238,0.2) 1px, transparent 0)', backgroundSize: '40px 40px' }} />
-
-        {/* 15개의 유선형 네온 경로 */}
         <svg className="absolute inset-0 w-full h-full" viewBox="0 0 1200 480">
           <defs>
-            <linearGradient id="flowGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#A78BFA" stopOpacity="0.2" />
+            <linearGradient id="neonGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="#A78BFA" stopOpacity="0" />
               <stop offset="50%" stopColor="#22D3EE" stopOpacity="0.8" />
-              <stop offset="100%" stopColor="#34D399" stopOpacity="0.2" />
+              <stop offset="100%" stopColor="#34D399" stopOpacity="0" />
             </linearGradient>
           </defs>
           {Array.from({ length: 15 }).map((_, i) => {
-            const yStart = 40 + i * 30;
-            const yEnd = 240 + (i - 7) * 5;
-            const path = `M 250,${yStart} C 500,${yStart} 700,${yEnd} 950,${yEnd}`;
+            const yStart = 60 + i * 25;
+            const yEnd = 240 + (i - 7) * 4;
+            const path = `M 250,${yStart} C 500,${yStart} 750,${yEnd} 950,${yEnd}`;
             return (
               <React.Fragment key={i}>
-                <path d={path} stroke="url(#flowGrad)" strokeWidth="1" fill="none" opacity="0.3" />
-                {/* 흐르는 네온 광자 */}
-                {[0, 1].map(pIdx => {
-                  const progress = ((tick * (1.2 + i * 0.1) + pIdx * 50) % 100) / 100;
-                  return <NeonPhoton key={pIdx} path={path} progress={progress} color={i % 2 === 0 ? '#A78BFA' : '#22D3EE'} />;
-                })}
+                <path d={path} stroke="url(#neonGrad)" strokeWidth="1.5" fill="none" opacity="0.4" />
+                <NeonPhoton key={`p1-${i}`} path={path} i={i} pIdx={0} tick={tick} />
+                <NeonPhoton key={`p2-${i}`} path={path} i={i} pIdx={1} tick={tick} />
               </React.Fragment>
             );
           })}
         </svg>
 
-        {/* 플로팅 태스크 라벨 (진행 중인 태스크) */}
+        {/* 플로팅 태스크 */}
         <div className="absolute inset-0">
-          {flowingTasks.slice(0, 5).map((t, i) => (
+          {flowingTasks.slice(0, 4).map((t, i) => (
             <FloatingTaskLabel key={t.id} task={t} index={i} tick={tick} />
           ))}
         </div>
 
-        {/* 바이너리 비트 레이어 */}
-        <div className="absolute inset-0 flex items-center justify-center opacity-10 font-mono text-[10px] gap-8 pointer-events-none select-none">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="flex flex-col gap-2">
-              {Array.from({ length: 10 }).map((_, j) => (
-                <span key={j} className="animate-pulse" style={{ animationDelay: `${(i+j)*0.2}s` }}>
-                  {Math.random() > 0.5 ? '101001' : '001101'}
-                </span>
-              ))}
+        {/* 바이너리 레이어 */}
+        <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 flex justify-center gap-12 opacity-5 font-mono text-[10px] select-none">
+          {[1,2,3,4].map(v => (
+            <div key={v} className="flex flex-col gap-1">
+              {[1,2,3,4,5,6].map(h => <span key={h}>{Math.random() > 0.5 ? '10101' : '01101'}</span>)}
             </div>
           ))}
         </div>
       </div>
 
-      {/* 태스크 박스 사이드 배치 */}
-      <div className="absolute left-2 top-2 bottom-2 w-[430px] grid grid-cols-3 gap-1 content-start overflow-y-auto no-scrollbar z-20">
-        {tasks.map((t, i) => <ServerNode key={'asis-'+t.id} task={t} mode="asis" index={i} />)}
-      </div>
-      <div className="absolute right-2 top-2 bottom-2 w-[430px] grid grid-cols-3 gap-1 content-start overflow-y-auto no-scrollbar z-20">
-        {tasks.map((t, i) => <ServerNode key={'tobe-'+t.id} task={t} mode="tobe" index={i} />)}
-      </div>
-
-      {/* 태스크 박스 사이드 배치 (이미 적용됨) */}
+      {/* 태스크 그리드 (사이드) */}
       <div className="absolute left-2 top-2 bottom-2 w-[430px] grid grid-cols-3 gap-1 content-start overflow-y-auto no-scrollbar z-20">
         {tasks.map((t, i) => <ServerNode key={'asis-'+t.id} task={t} mode="asis" index={i} />)}
       </div>
@@ -275,31 +254,32 @@ function DataMigrationVisual({ tasks, flowingTasks, tick }) {
   );
 }
 
-function NeonPhoton({ path, progress, color }) {
-  // SVG 경로 위 점 구하기 (간략화된 베지어 계산)
+function NeonPhoton({ path, i, pIdx, tick }) {
+  const progress = ((tick * (1.5 + i * 0.1) + pIdx * 50) % 100) / 100;
   const x = 250 + (950 - 250) * progress;
-  const yBase = 40 + (Math.floor((x - 250) / 30) * 30); // 실제 경로 계산은 복잡하므로 대략적 위치
-  const yOffset = Math.sin(progress * Math.PI) * 100;
-  
+  // 가짜 곡선 위치 계산 (Cubic Bezier 근사치)
+  const t = progress;
+  const cx1 = 500, cx2 = 750;
+  const cy1 = 60 + i * 25, cy2 = 240 + (i - 7) * 4;
+  const yStart = 60 + i * 25, yEnd = 240 + (i - 7) * 4;
+  const y = Math.pow(1-t, 3)*yStart + 3*Math.pow(1-t, 2)*t*cy1 + 3*(1-t)*Math.pow(t, 2)*cy2 + Math.pow(t, 3)*yEnd;
+
   return (
-    <circle r="2" fill={color} style={{
-      filter: `drop-shadow(0 0 8px ${color})`,
-      transition: 'all 0.1s linear',
-      cx: x,
-      cy: 40 + (progress * 200) + (Math.sin(progress * 5) * 20) // 가짜 곡선
+    <circle cx={x} cy={y} r="2.5" fill={i % 2 === 0 ? '#A78BFA' : '#22D3EE'} style={{
+      filter: `drop-shadow(0 0 10px ${i % 2 === 0 ? '#A78BFA' : '#22D3EE'})`,
+      opacity: 1 - Math.abs(0.5 - progress) * 2
     }} />
   );
 }
 
 function FloatingTaskLabel({ task, index, tick }) {
-  const x = 350 + (index * 120) + Math.sin(tick * 0.1 + index) * 20;
-  const y = 100 + (index * 60) + Math.cos(tick * 0.1 + index) * 20;
-  
+  const x = 400 + (index * 100) + Math.sin(tick * 0.05 + index) * 30;
+  const y = 120 + (index * 70) + Math.cos(tick * 0.05 + index) * 30;
   return (
-    <div className="absolute px-4 py-1.5 rounded-full border-2 border-cyan-400/50 bg-black/80 backdrop-blur-md shadow-[0_0_20px_rgba(34,211,238,0.3)] flex items-center gap-2 transition-all duration-1000"
+    <div className="absolute px-5 py-2 rounded-xl border-2 border-cyan-400/40 bg-black/60 backdrop-blur-xl shadow-[0_0_25px_rgba(34,211,238,0.2)] flex items-center gap-3 transition-all duration-1000"
       style={{ left: x, top: y }}>
-      <div className="w-2 h-2 rounded-full bg-cyan-400 animate-ping" />
-      <span className="text-[10px] font-black text-cyan-300 tracking-wider">TASK-{task.id}</span>
+      <div className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse" />
+      <span className="text-[10px] font-black text-cyan-300 uppercase tracking-tighter">TASK-{task.id}</span>
     </div>
   );
 }
@@ -315,8 +295,8 @@ function ServerNode({ task, mode, index }) {
   return (
     <div className={`p-2 rounded-lg border transition-all duration-500 ${blinking ? 'node-blink' : ''}`}
       style={{
-        background: deactivated ? 'rgba(15,23,42,0.6)' : active ? `${g.color}20` : 'rgba(15,23,42,0.8)',
-        borderColor: deactivated ? 'rgba(255,255,255,0.05)' : blinking ? '#FFF' : `${g.color}50`,
+        background: deactivated ? 'rgba(15,23,42,0.6)' : active ? `${g.color}15` : 'rgba(15,23,42,0.8)',
+        borderColor: deactivated ? 'rgba(255,255,255,0.05)' : blinking ? '#FBBF24' : `${g.color}40`,
         opacity: deactivated ? 0.4 : 1
       }}>
       <div className="flex justify-between items-center mb-1">
