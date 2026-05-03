@@ -304,7 +304,7 @@ function FloatingTaskLabel({ task, index, tick, labelX, isMobile }) {
       }}>
       <div className="w-2 h-2 md:w-3 md:h-3 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_15px_rgba(52,211,153,1)]" />
       <div className="flex flex-col">
-        <span className="text-[8px] md:text-xs font-black text-emerald-400/70 tracking-tighter uppercase leading-none mb-0.5 md:mb-1">Migration Task</span>
+        <span className="text-[8px] md:text-xs font-black text-emerald-400/70 tracking-tighter uppercase leading-none mb-0.5 md:mb-1">진행중 작업번호</span>
         <span className="text-sm md:text-xl font-black text-white tracking-tighter drop-shadow-md leading-none">#{task.id}</span>
       </div>
     </div>
