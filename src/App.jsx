@@ -86,11 +86,12 @@ export default function Dashboard() {
   }, []);
 
   const stats = useMemo(() => {
-    const done = tasks.filter(t => t.status === 'done').length;
-    const prog = tasks.filter(t => t.status === 'progress').length;
-    const wait = tasks.filter(t => t.status === 'wait').length;
-    const total = tasks.length;
-    const overall = total ? Math.round(tasks.reduce((s, t) => s + t.progress, 0) / total) : 0;
+    const visibleTasks = tasks.filter(t => TASK_GROUPS[t.group] && !t.id.startsWith('T'));
+    const done = visibleTasks.filter(t => t.status === 'done').length;
+    const prog = visibleTasks.filter(t => t.status === 'progress').length;
+    const wait = visibleTasks.filter(t => t.status === 'wait').length;
+    const total = visibleTasks.length;
+    const overall = total ? Math.round(visibleTasks.reduce((s, t) => s + t.progress, 0) / total) : 0;
     return { done, prog, wait, total, overall };
   }, [tasks]);
 
@@ -340,7 +341,7 @@ function MobileGauges({ tasks }) {
   const byGroup = useMemo(() => {
     const r = {};
     Object.keys(TASK_GROUPS).forEach(g => {
-      const f = tasks.filter(t => t.group === g);
+      const f = tasks.filter(t => t.group === g && !t.id.startsWith('T'));
       const pct = f.length ? Math.round(f.reduce((s, t) => s + t.progress, 0) / f.length) : 0;
       r[g] = { pct };
     });
@@ -363,7 +364,7 @@ function CapsuleGauges({ tasks }) {
   const byGroup = useMemo(() => {
     const r = {};
     Object.keys(TASK_GROUPS).forEach(g => {
-      const f = tasks.filter(t => t.group === g);
+      const f = tasks.filter(t => t.group === g && !t.id.startsWith('T'));
       const done = f.filter(t => t.status === 'done').length;
       const pct = f.length ? Math.round(f.reduce((s, t) => s + t.progress, 0) / f.length) : 0;
       r[g] = { total: f.length, done, pct };
