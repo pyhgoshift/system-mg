@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import confetti from 'canvas-confetti';
 import { CheckCircle2, Globe, Lock, ExternalLink, PartyPopper, Sparkles, Wifi, WifiOff, Radio, Server, Cloud, ArrowRight } from 'lucide-react';
 
 // ============================
@@ -80,8 +81,7 @@ export default function Dashboard() {
       };
       fetchData();
       const poll = setInterval(fetchData, POLL_INTERVAL_MS);
-      const tickT = setInterval(() => setTick(x => x + 1), 600);
-      return () => { clearInterval(poll); clearInterval(tickT); };
+      return () => clearInterval(poll);
     }
   }, []);
 
@@ -94,6 +94,13 @@ export default function Dashboard() {
     const overall = total ? Math.round(visibleTasks.reduce((s, t) => s + t.progress, 0) / total) : 0;
     return { done, prog, wait, total, overall };
   }, [tasks]);
+
+  useEffect(() => {
+    if (stats.overall < 100) {
+      const tickT = setInterval(() => setTick(x => x + 1), 600);
+      return () => clearInterval(tickT);
+    }
+  }, [stats.overall]);
 
   const dnsTask = tasks.find(t => t.isDns);
   const dnsReady = dnsTask && dnsTask.status === 'done';
@@ -142,7 +149,7 @@ export default function Dashboard() {
       </div>
 
       <main className="relative px-2 md:px-6 pb-4">
-        <DataMigrationVisual tasks={tasks} flowingTasks={flowingTasks} tick={tick} />
+        <DataMigrationVisual tasks={tasks} flowingTasks={flowingTasks} tick={tick} overall={stats.overall} />
         <div className="hidden md:block">
           <CapsuleGauges tasks={tasks} />
         </div>
@@ -165,8 +172,17 @@ function Header({ now, stats, connStatus, lastSync }) {
     <header className="relative pt-6 md:pt-4 pb-2 px-4 md:px-10 text-center z-40">
       <div className="flex flex-wrap items-center justify-center gap-2 md:gap-4 mb-2 text-[10px] md:text-sm">
         <div className="px-2 py-0.5 rounded bg-white/10 text-[8px] md:text-[10px] font-black tracking-tighter">v2.5</div>
-        <div className="w-2 h-2 md:w-3 md:h-3 rounded-full bg-rose-500 animate-pulse shadow-[0_0_15px_rgba(244,63,94,0.8)]" />
-        <span className="text-rose-300 font-black tracking-[0.2em] md:tracking-[0.5em] text-[10px] md:text-xs">LIVE MONITORING</span>
+        {stats.overall === 100 ? (
+          <>
+            <div className="w-2 h-2 md:w-3 md:h-3 rounded-full bg-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.8)]" />
+            <span className="text-blue-300 font-black tracking-[0.2em] md:tracking-[0.5em] text-[10px] md:text-xs">MIGRATION COMPLETED</span>
+          </>
+        ) : (
+          <>
+            <div className="w-2 h-2 md:w-3 md:h-3 rounded-full bg-rose-500 animate-pulse shadow-[0_0_15px_rgba(244,63,94,0.8)]" />
+            <span className="text-rose-300 font-black tracking-[0.2em] md:tracking-[0.5em] text-[10px] md:text-xs">LIVE MONITORING</span>
+          </>
+        )}
         <span className="hidden md:inline text-white/30">·</span>
         <span className="text-white/80 font-black text-sm md:text-base tabular-nums tracking-widest">{time}</span>
         <span className="hidden md:inline text-white/30">·</span>
@@ -203,9 +219,40 @@ function StatMini({ label, value, color, size = "text-2xl" }) {
   );
 }
 
-function DataMigrationVisual({ tasks, flowingTasks, tick }) {
+function DataMigrationVisual({ tasks, flowingTasks, tick, overall }) {
   const [isMobile, setIsMobile] = React.useState(typeof window !== 'undefined' && window.innerWidth < 768);
   
+  React.useEffect(() => {
+    if (overall === 100) {
+      const duration = 3000;
+      const end = Date.now() + duration;
+
+      const frame = () => {
+        confetti({
+          particleCount: 5,
+          angle: 60,
+          spread: 55,
+          origin: { x: 0, y: 0.8 },
+          colors: ['#34D399', '#A78BFA', '#22D3EE'],
+          zIndex: 100
+        });
+        confetti({
+          particleCount: 5,
+          angle: 120,
+          spread: 55,
+          origin: { x: 1, y: 0.8 },
+          colors: ['#34D399', '#A78BFA', '#22D3EE'],
+          zIndex: 100
+        });
+
+        if (Date.now() < end) {
+          requestAnimationFrame(frame);
+        }
+      };
+      frame();
+    }
+  }, [overall]);
+
   React.useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
     window.addEventListener('resize', handleResize);
@@ -239,9 +286,13 @@ function DataMigrationVisual({ tasks, flowingTasks, tick }) {
             return (
               <React.Fragment key={i}>
                 <path d={path} stroke="url(#neonGrad)" strokeWidth={2.5 + (i % 3) * 1.5} fill="none" opacity={0.3 + (i % 5) * 0.1} markerEnd="url(#arrow)" style={{ filter: 'drop-shadow(0 0 35px rgba(52,211,153,0.8))' }} />
-                <NeonPhoton key={`p1-${i}`} i={i} pIdx={0} tick={tick} endX={endX} />
-                <NeonPhoton key={`p2-${i}`} i={i} pIdx={1} tick={tick} endX={endX} />
-                <NeonPhoton key={`p3-${i}`} i={i} pIdx={2} tick={tick} endX={endX} />
+                {overall < 100 && (
+                  <>
+                    <NeonPhoton key={`p1-${i}`} i={i} pIdx={0} tick={tick} endX={endX} />
+                    <NeonPhoton key={`p2-${i}`} i={i} pIdx={1} tick={tick} endX={endX} />
+                    <NeonPhoton key={`p3-${i}`} i={i} pIdx={2} tick={tick} endX={endX} />
+                  </>
+                )}
               </React.Fragment>
             );
           })}
@@ -254,6 +305,18 @@ function DataMigrationVisual({ tasks, flowingTasks, tick }) {
           ))}
         </div>
       </div>
+
+      {/* 100% 달성 시 축하 오버레이 */}
+      {overall === 100 && (
+        <div className="absolute inset-0 z-40 flex flex-col items-center justify-center pointer-events-none">
+          <div className="px-6 py-4 md:px-10 md:py-6 bg-black/60 backdrop-blur-xl rounded-3xl border border-emerald-500/40 shadow-[0_0_50px_rgba(52,211,153,0.2)] flex flex-col items-center gap-2 md:gap-4 animate-in zoom-in duration-500">
+            <PartyPopper className="w-10 h-10 md:w-16 md:h-16 text-emerald-400 animate-bounce" />
+            <h2 className="text-xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-200 via-emerald-400 to-emerald-200 drop-shadow-[0_0_15px_rgba(52,211,153,0.5)] text-center tracking-tighter">
+              성공적인 이전통합을<br className="md:hidden" /> 축하 합니다.
+            </h2>
+          </div>
+        </div>
+      )}
 
       {/* 태스크 그리드 (좌우 대칭 배치) */}
       <div className="absolute left-1 md:left-4 top-0 bottom-2 w-[110px] md:w-[430px] grid grid-cols-1 md:grid-cols-3 gap-0.5 md:gap-1 content-start overflow-y-auto no-scrollbar z-20">
