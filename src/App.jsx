@@ -3,9 +3,13 @@ import confetti from 'canvas-confetti';
 import { CheckCircle2, Globe, Lock, ExternalLink, PartyPopper, Sparkles, Wifi, WifiOff, Radio, Server, Cloud, ArrowRight } from 'lucide-react';
 
 // ============================
-// 설정
+// 설정 (Master Router)
 // ============================
-const SHEETS_API_URL = 'https://script.google.com/macros/s/AKfycbzPtdKQtyibcPb0UXiYgYxZKjT8Cbbo_I1mYnXkt1IG4Ap0mbv6l4KGvlOts03qSCDAgw/exec';
+export const MASTER_API_URL = 'https://script.google.com/macros/s/AKfycbzk_1fhmbjWqOPY4hsBQE0ngd2x9ZvxkkeJgTPhcro8d-AUisau_g78ZQVckOxg0is/exec'; 
+
+const FALLBACK_API_URL = 'https://script.google.com/macros/s/AKfycbzPtdKQtyibcPb0UXiYgYxZKjT8Cbbo_I1mYnXkt1IG4Ap0mbv6l4KGvlOts03qSCDAgw/exec';
+const FALLBACK_ORG_NAME = '경기도교육청 중앙도서관';
+const FALLBACK_SYS_NAME = '이전 통합 모니터링';
 const POLL_INTERVAL_MS = 5000;
 
 // ============================
@@ -51,26 +55,59 @@ const DEMO_TASKS = [
   { id: '812', name: '8.12 Web방화벽 공지사항 제거', group: 'G8', status: 'wait', progress: 0 },
 ];
 
-export default function Dashboard() {
+export default function App() {
+  const [config, setConfig] = useState({
+    orgName: FALLBACK_ORG_NAME,
+    sysName: FALLBACK_SYS_NAME,
+    targetUrl: MASTER_API_URL ? null : FALLBACK_API_URL,
+    loaded: !MASTER_API_URL
+  });
+
   const [tasks, setTasks] = useState(DEMO_TASKS);
-  const [tick, setTick] = useState(0);
   const [now, setNow] = useState(new Date());
   const [verifiedUrls, setVerifiedUrls] = useState(new Set());
   const [verifyingId, setVerifyingId] = useState(null);
   const [celebrating, setCelebrating] = useState(false);
-  const [connStatus, setConnStatus] = useState(SHEETS_API_URL ? 'connecting' : 'demo');
+  const [connStatus, setConnStatus] = useState('connecting'); 
   const [lastSync, setLastSync] = useState(null);
+  const [tick, setTick] = useState(0);
+
+  // 마스터 설정 불러오기
+  useEffect(() => {
+    if (MASTER_API_URL) {
+      fetch(MASTER_API_URL)
+        .then(res => res.json())
+        .then(json => {
+          if (json.ok) {
+            setConfig({
+              orgName: json.orgName,
+              sysName: json.sysName,
+              targetUrl: json.targetUrl,
+              loaded: true
+            });
+          } else {
+            console.error("Master API Error:", json.error);
+            setConfig({ orgName: FALLBACK_ORG_NAME, sysName: FALLBACK_SYS_NAME, targetUrl: FALLBACK_API_URL, loaded: true });
+          }
+        })
+        .catch(err => {
+          console.error("Master API Fetch Error:", err);
+          setConfig({ orgName: FALLBACK_ORG_NAME, sysName: FALLBACK_SYS_NAME, targetUrl: FALLBACK_API_URL, loaded: true });
+        });
+    }
+  }, []);
 
   useEffect(() => {
     const t = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(t);
   }, []);
 
+  // 데이터 폴링 (config.targetUrl이 준비된 후 실행)
   useEffect(() => {
-    if (SHEETS_API_URL) {
+    if (config.loaded && config.targetUrl) {
       const fetchData = async () => {
         try {
-          const res = await fetch(SHEETS_API_URL);
+          const res = await fetch(config.targetUrl);
           const json = await res.json();
           if (json.ok && Array.isArray(json.tasks)) {
             setTasks(json.tasks);
@@ -82,8 +119,10 @@ export default function Dashboard() {
       fetchData();
       const poll = setInterval(fetchData, POLL_INTERVAL_MS);
       return () => clearInterval(poll);
+    } else if (config.loaded) {
+      setConnStatus('demo');
     }
-  }, []);
+  }, [config]);
 
   const stats = useMemo(() => {
     const visibleTasks = tasks.filter(t => TASK_GROUPS[t.group] && !t.id.startsWith('T'));
@@ -129,7 +168,7 @@ export default function Dashboard() {
         fontFamily: '"Pretendard", "Noto Sans KR", sans-serif'
       }}>
         <BinaryRain />
-        <Header now={now} stats={stats} connStatus={connStatus} lastSync={lastSync} />
+        <Header now={now} stats={stats} connStatus={connStatus} lastSync={lastSync} orgName={config.orgName} sysName={config.sysName} />
 
       <div className="absolute top-[170px] md:top-22 left-2 md:left-8 z-30 block">
         <div className="px-3 md:px-12 py-0.5 md:py-1 rounded-full backdrop-blur-md bg-slate-800/40 border border-slate-700/50">
@@ -166,10 +205,15 @@ export default function Dashboard() {
   );
 }
 
-function Header({ now, stats, connStatus, lastSync }) {
+function Header({ now, stats, connStatus, lastSync, orgName, sysName }) {
   const time = now.toLocaleTimeString('ko-KR', { hour12: false });
   return (
     <header className="relative pt-6 md:pt-4 pb-2 px-4 md:px-10 text-center z-40">
+      <div className="absolute top-8 left-4 md:left-10 z-50 pointer-events-none">
+        <h1 className="text-xl md:text-3xl font-black text-white tracking-tighter leading-tight drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)]">
+          {orgName} <br className="md:hidden" /> {sysName}
+        </h1>
+      </div>
       <div className="flex flex-wrap items-center justify-center gap-2 md:gap-4 mb-2 text-[10px] md:text-sm">
         <div className="px-2 py-0.5 rounded bg-white/10 text-[8px] md:text-[10px] font-black tracking-tighter">v2.5</div>
         {stats.overall === 100 ? (
@@ -188,13 +232,8 @@ function Header({ now, stats, connStatus, lastSync }) {
         <span className="hidden md:inline text-white/30">·</span>
         <span className="font-black uppercase text-[10px] md:text-xs tracking-widest" style={{ color: connStatus === 'connected' ? '#34D399' : '#FBBF24' }}>{connStatus}</span>
       </div>
-      <h1 className="text-sm md:text-3xl font-black tracking-[0.1em] md:tracking-[0.4em] text-transparent bg-clip-text bg-gradient-to-r from-slate-200 via-white to-slate-200 drop-shadow-[0_0_30px_rgba(255,255,255,0.3)] mb-2 md:mb-6" style={{
-        fontFamily: '"Pretendard", sans-serif'
-      }}>
-        경기도교육청 중앙도서관 <br className="md:hidden" /> 이전 통합 모니터링
-      </h1>
       
-      <div className="flex items-center justify-center gap-4 md:gap-12 scale-90 md:scale-100">
+      <div className="flex items-center justify-center gap-4 md:gap-12 scale-90 md:scale-100 mt-12 md:mt-0">
         <div className="flex items-center gap-2 md:gap-4">
           <div className="text-[8px] md:text-[10px] text-white/40 uppercase tracking-[0.1em] md:tracking-[0.2em] font-black">Overall</div>
           <div className="text-2xl md:text-5xl font-black text-emerald-400 drop-shadow-[0_0_20px_rgba(52,211,153,0.3)]">{stats.overall}%</div>
