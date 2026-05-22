@@ -1,16 +1,54 @@
-# React + Vite
+# PyhgoShift LiveShow Dashboard (AgentOps)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**PyhgoShift**의 궁극적인 목표인 '인간 개입 0'을 실현하기 위해 설계된 **B2B 대시보드 자동 생성 및 라이브 관제 시스템**입니다. 
+구글 시트(Google Sheets)에 입력된 작업 현황을 5초 단위로 실시간 폴링하여 사이버펑크 네온 스타일의 관제 전광판으로 렌더링합니다.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## 🏗️ 1. 아키텍처 개요: 마스터 라우터 (Master Router)
 
-## React Compiler
+이 프로젝트의 핵심은 **"소스 코드를 단 한 줄도 수정하지 않고, 수십 개의 새로운 사업(프로젝트) 대시보드를 무한대로 찍어낼 수 있다"**는 것입니다.
+이를 위해 단일 Vercel 프론트엔드가 '중앙 컨트롤 타워(LiveShow-Master)'를 바라보도록 설계되었습니다.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+1. **마스터 시트 (LiveShow-Master)**: 여러 사업의 리스트와 각각의 '타스크 실행 API 주소'를 관리하는 중앙 통제 구글 시트.
+2. **React 프론트엔드 (본 저장소)**: 최초 접속 시 마스터 시트 API를 호출하여 **체크박스가 켜진(TRUE) 단 하나의 사업 정보(기관명, 시스템명, 실행 주소)**를 받아옵니다.
+3. **동적 라우팅**: 받아온 기관명으로 화면 타이틀을 즉시 변경하고, 받아온 '실행 주소'로 데이터를 폴링하기 시작합니다.
 
-## Expanding the ESLint configuration
+---
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## 🚀 2. 새로운 사업(프로젝트) 추가 메뉴얼 (3단계)
+
+새로운 시스템 이전 사업이 수주되었을 때, 개발자의 도움 없이 대시보드를 생성하는 방법입니다.
+
+### [1단계] 타스크 실행 시트 생성 및 Apps Script 배포 (🌟 가장 핵심!)
+대시보드에 데이터를 뿌려주는 **진짜 심장**은 타스크가 적혀있는 구글 시트의 **Apps Script**입니다.
+1. 기존 사업에 쓰던 '타스크 구글 시트'를 그대로 복사(사본 만들기)하여 새 사업용으로 만듭니다.
+2. 새 시트 상단 메뉴에서 **[확장 프로그램] ➡️ [Apps Script]**를 클릭합니다.
+   - *주의: 구글 시트의 열(Column) 구조(예: B열=작업명, J열=상태, Q열=완료체크)가 변경되면 Apps Script가 데이터를 찾지 못해 대시보드가 망가집니다. 시트의 구조는 절대 변경하지 마십시오!*
+3. 우측 상단의 **[배포] ➡️ [새 배포]**를 클릭합니다.
+4. 배포 권한을 반드시 **"모든 사용자(Anyone)"**로 설정하여 배포합니다.
+5. 발급된 `https://script.google.com/macros/s/.../exec` 주소를 복사합니다.
+
+### [2단계] 마스터 시트(LiveShow-Master)에 정보 등록
+1. 중앙 컨트롤 타워인 `LiveShow-Master` 구글 시트를 엽니다.
+2. 새로운 빈 줄에 다음 정보를 입력합니다:
+   - **A열 (적용)**: 체크박스를 클릭하여 켭니다 (TRUE). (다른 사업의 체크박스는 끕니다)
+   - **B열 (기관명)**: 예) 서울특별시교육청
+   - **C열 (시스템명)**: 예) 클라우드 통합 이전
+   - **D열 (실행 주소)**: 1단계에서 복사해 온 **새로운 Apps Script 웹 앱 주소**를 붙여넣습니다.
+
+### [3단계] 대시보드 새로고침
+1. 인터넷 브라우저에서 `system-mg.vercel.app` (라이브 대시보드)에 접속하여 새로고침(F5)을 누릅니다.
+2. **끝!** 마스터 시트에서 체크된 새로운 기관명과 데이터로 화면이 완벽하게 변신하여 실시간 관제를 시작합니다.
+
+---
+
+## 🎆 3. UI/UX 및 특수 시각 효과
+
+* **5초 단위 실시간 동기화**: `setInterval` 폴링을 통해 사용자의 조작 없이 5초마다 데이터가 자동 갱신됩니다.
+* **네온 입자 데이터 흐름 (NeonPhoton)**: 진행 중(Progress)인 작업이 있을 때마다 화면 좌측(AS-IS)에서 우측(TO-BE)으로 형광색 빛의 입자가 날아가는 사이버펑크 연출이 적용되어 있습니다.
+* **100% 달성 축하 연출**: 전체 진행률이 **100%**에 도달하는 즉시 다음의 효과가 발동합니다.
+  - 상단의 `LIVE MONITORING(🔴)` 점멸이 멈추고 `MIGRATION COMPLETED(🔵)` 안정화 텍스트로 변경.
+  - 데이터 입자의 흐름(네온 폭풍)이 즉시 멈추며 평화로운 대기 상태로 전환.
+  - 화면 정중앙에 글래스모피즘 오버레이 팝업이 뜨며 **"성공적인 이전통합을 축하 합니다."** 네온 문구 노출.
+  - 화면 양쪽 하단에서 3초간 화려한 **폭죽(Confetti)** 애니메이션 발사.
