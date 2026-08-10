@@ -653,7 +653,7 @@ function SyncPanel({ dnsTask, dnsReady, urlTasks, verifiedUrls, onUrlClick, shee
             </div>
             <div className="flex items-center w-full bg-black/40 border border-white/10 rounded-full px-4 py-1.5">
               <span className="text-[10px] md:text-xs font-black text-white/40 mr-3 w-16">VERCEL</span>
-              <span className="text-[9px] md:text-[11px] text-white/60 font-mono truncate">pyhgoshift-mg.vercel.app</span>
+              <span className="text-[9px] md:text-[11px] text-white/60 font-mono truncate">system-mg.vercel.app</span>
             </div>
           </div>
           
