@@ -1,12 +1,16 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import confetti from 'canvas-confetti';
-import { CheckCircle2, Globe, Lock, ExternalLink, PartyPopper, Sparkles, Wifi, WifiOff, Radio, Server, Cloud, ArrowRight } from 'lucide-react';
+import { CheckCircle2, Globe, Lock, ExternalLink, PartyPopper, Sparkles, Wifi, WifiOff, Radio, Server, Cloud, ArrowRight, Send, Settings } from 'lucide-react';
 
 // ============================
-// 설정
+// 설정 (Config)
 // ============================
-const SHEETS_API_URL = 'https://script.google.com/macros/s/AKfycbzPtdKQtyibcPb0UXiYgYxZKjT8Cbbo_I1mYnXkt1IG4Ap0mbv6l4KGvlOts03qSCDAgw/exec';
+const DEFAULT_SHEETS_API_URL = 'https://script.google.com/macros/s/AKfycbzPtdKQtyibcPb0UXiYgYxZKjT8Cbbo_I1mYnXkt1IG4Ap0mbv6l4KGvlOts03qSCDAgw/exec';
 const POLL_INTERVAL_MS = 5000;
+const SITE_NAME = "경기도교육청";
+const SITE_TARGET = "중앙도서관";
+const PROJECT_NAME = "이전 통합 모니터링";
+const APP_VERSION = "v3.0";
 
 // ============================
 // 6개 작업 그룹
@@ -58,8 +62,15 @@ export default function Dashboard() {
   const [verifiedUrls, setVerifiedUrls] = useState(new Set());
   const [verifyingId, setVerifyingId] = useState(null);
   const [celebrating, setCelebrating] = useState(false);
-  const [connStatus, setConnStatus] = useState(SHEETS_API_URL ? 'connecting' : 'demo');
+  const [connStatus, setConnStatus] = useState('demo');
   const [lastSync, setLastSync] = useState(null);
+  const [sheetUrl, setSheetUrl] = useState(DEFAULT_SHEETS_API_URL);
+  const [titleConfig, setTitleConfig] = useState({
+    org1: SITE_NAME,
+    org2: SITE_TARGET,
+    subtitle: PROJECT_NAME
+  });
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   useEffect(() => {
     const t = setInterval(() => setNow(new Date()), 1000);
@@ -67,10 +78,11 @@ export default function Dashboard() {
   }, []);
 
   useEffect(() => {
-    if (SHEETS_API_URL) {
+    if (sheetUrl) {
+      setConnStatus('connecting');
       const fetchData = async () => {
         try {
-          const res = await fetch(SHEETS_API_URL);
+          const res = await fetch(sheetUrl);
           const json = await res.json();
           if (json.ok && Array.isArray(json.tasks)) {
             setTasks(json.tasks);
@@ -83,7 +95,7 @@ export default function Dashboard() {
       const poll = setInterval(fetchData, POLL_INTERVAL_MS);
       return () => clearInterval(poll);
     }
-  }, []);
+  }, [sheetUrl]);
 
   const stats = useMemo(() => {
     const visibleTasks = tasks.filter(t => TASK_GROUPS[t.group] && !t.id.startsWith('T'));
@@ -105,7 +117,7 @@ export default function Dashboard() {
   const dnsTask = tasks.find(t => t.isDns);
   const dnsReady = dnsTask && dnsTask.status === 'done';
   const urlTasks = tasks.filter(t => t.isUrlCheck).sort((a, b) => Number(a.id) - Number(b.id));
-  const flowingTasks = tasks.filter(t => t.status === 'progress');
+  const flowingTasks = tasks.filter(t => t.status === 'progress').sort((a, b) => Number(a.id) - Number(b.id));
 
   const handleUrlClick = (id) => {
     if (!dnsReady || verifiedUrls.has(id) || verifyingId) return;
@@ -129,26 +141,23 @@ export default function Dashboard() {
         fontFamily: '"Pretendard", "Noto Sans KR", sans-serif'
       }}>
         <BinaryRain />
-        <Header now={now} stats={stats} connStatus={connStatus} lastSync={lastSync} />
-
-      <div className="absolute top-[170px] md:top-22 left-2 md:left-8 z-30 block">
-        <div className="px-3 md:px-12 py-0.5 md:py-1 rounded-full backdrop-blur-md bg-slate-800/40 border border-slate-700/50">
-          <div className="flex items-baseline gap-1 md:gap-3">
-            <div className="text-xs md:text-xl font-black text-slate-300">기존환경</div>
-            <div className="text-[6px] md:text-[10px] tracking-widest text-slate-500 font-bold uppercase">AS-IS</div>
-          </div>
-        </div>
-      </div>
-      <div className="absolute top-[170px] md:top-22 right-2 md:right-8 z-30 block">
-        <div className="px-3 md:px-12 py-0.5 md:py-1 rounded-full backdrop-blur-md bg-emerald-500/10 border border-emerald-500/30">
-          <div className="flex items-baseline gap-1 md:gap-3">
-            <div className="text-xs md:text-xl font-black text-emerald-400">신규환경</div>
-            <div className="text-[6px] md:text-[10px] tracking-widest text-emerald-500 font-bold uppercase">TO-BE</div>
-          </div>
-        </div>
-      </div>
+        <Header now={now} stats={stats} connStatus={connStatus} lastSync={lastSync} titleConfig={titleConfig} />
 
       <main className="relative px-2 md:px-6 pb-4">
+        <div className="flex justify-between w-full px-2 md:px-8 mb-2 z-30 relative">
+          <div className="px-3 md:px-12 py-0.5 md:py-1 rounded-full backdrop-blur-md bg-slate-800/40 border border-slate-700/50">
+            <div className="flex items-baseline gap-1 md:gap-3">
+              <div className="text-xs md:text-xl font-black text-slate-300">기존환경</div>
+              <div className="text-[6px] md:text-[10px] tracking-widest text-slate-500 font-bold uppercase">AS-IS</div>
+            </div>
+          </div>
+          <div className="px-3 md:px-12 py-0.5 md:py-1 rounded-full backdrop-blur-md bg-emerald-500/10 border border-emerald-500/30">
+            <div className="flex items-baseline gap-1 md:gap-3">
+              <div className="text-xs md:text-xl font-black text-emerald-400">신규환경</div>
+              <div className="text-[6px] md:text-[10px] tracking-widest text-emerald-500 font-bold uppercase">TO-BE</div>
+            </div>
+          </div>
+        </div>
         <DataMigrationVisual tasks={tasks} flowingTasks={flowingTasks} tick={tick} overall={stats.overall} />
         <div className="hidden md:block">
           <CapsuleGauges tasks={tasks} />
@@ -156,22 +165,29 @@ export default function Dashboard() {
         <div className="md:hidden">
           <MobileGauges tasks={tasks} />
         </div>
-        <DnsPanel dnsTask={dnsTask} dnsReady={dnsReady} urlTasks={urlTasks} verifiedUrls={verifiedUrls} verifyingId={verifyingId} onUrlClick={handleUrlClick} />
+        <SyncPanel 
+          dnsTask={dnsTask} dnsReady={dnsReady} urlTasks={urlTasks} 
+          verifiedUrls={verifiedUrls} onUrlClick={handleUrlClick} 
+          sheetUrl={sheetUrl} setSheetUrl={setSheetUrl} 
+          lastSync={lastSync} connStatus={connStatus}
+          onSettingsClick={() => setIsSettingsOpen(true)}
+        />
       </main>
 
-      {celebrating && <CelebrationOverlay onClose={() => setCelebrating(false)} />}
+      {celebrating && <CelebrationOverlay onClose={() => setCelebrating(false)} titleConfig={titleConfig} />}
+      {isSettingsOpen && <SettingsModal titleConfig={titleConfig} setTitleConfig={setTitleConfig} onClose={() => setIsSettingsOpen(false)} />}
       <Styles />
       </div>
     </div>
   );
 }
 
-function Header({ now, stats, connStatus, lastSync }) {
+function Header({ now, stats, connStatus, titleConfig }) {
   const time = now.toLocaleTimeString('ko-KR', { hour12: false });
   return (
-    <header className="relative pt-6 md:pt-4 pb-2 px-4 md:px-10 text-center z-40">
-      <div className="flex flex-wrap items-center justify-center gap-2 md:gap-4 mb-2 text-[10px] md:text-sm">
-        <div className="px-2 py-0.5 rounded bg-white/10 text-[8px] md:text-[10px] font-black tracking-tighter">v2.5</div>
+    <header className="relative pt-6 md:pt-6 pb-4 px-4 md:px-10 text-center z-40 flex flex-col items-center">
+      <div className="flex flex-wrap items-center justify-center gap-2 md:gap-4 mb-4 md:mb-6 text-[10px] md:text-sm">
+        <div className="px-2 py-0.5 rounded bg-white/10 text-[8px] md:text-[10px] font-black tracking-tighter">{APP_VERSION}</div>
         {stats.overall === 100 ? (
           <>
             <div className="w-2 h-2 md:w-3 md:h-3 rounded-full bg-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.8)]" />
@@ -188,33 +204,40 @@ function Header({ now, stats, connStatus, lastSync }) {
         <span className="hidden md:inline text-white/30">·</span>
         <span className="font-black uppercase text-[10px] md:text-xs tracking-widest" style={{ color: connStatus === 'connected' ? '#34D399' : '#FBBF24' }}>{connStatus}</span>
       </div>
-      <h1 className="text-sm md:text-3xl font-black tracking-[0.1em] md:tracking-[0.4em] text-transparent bg-clip-text bg-gradient-to-r from-slate-200 via-white to-slate-200 drop-shadow-[0_0_30px_rgba(255,255,255,0.3)] mb-2 md:mb-6" style={{
-        fontFamily: '"Pretendard", sans-serif'
-      }}>
-        경기도교육청 중앙도서관 <br className="md:hidden" /> 이전 통합 모니터링
-      </h1>
       
-      <div className="flex items-center justify-center gap-4 md:gap-12 scale-90 md:scale-100">
-        <div className="flex items-center gap-2 md:gap-4">
-          <div className="text-[8px] md:text-[10px] text-white/40 uppercase tracking-[0.1em] md:tracking-[0.2em] font-black">Overall</div>
-          <div className="text-2xl md:text-5xl font-black text-emerald-400 drop-shadow-[0_0_20px_rgba(52,211,153,0.3)]">{stats.overall}%</div>
+      {/* 4. 타이틀 박스 디자인 적용 (상하 30% 축소) */}
+      <div className="inline-block bg-white/5 border border-white/10 rounded-[1.5rem] px-6 py-3 md:px-12 md:py-5 backdrop-blur-md mb-4 md:mb-6 shadow-[0_0_50px_rgba(255,255,255,0.03)]">
+        <h1 className="text-xl md:text-4xl font-black tracking-[0.1em] md:tracking-[0.3em] text-transparent bg-clip-text bg-gradient-to-r from-slate-200 via-white to-slate-200 drop-shadow-[0_0_30px_rgba(255,255,255,0.3)] leading-tight md:leading-tight" style={{
+          fontFamily: '"Pretendard", sans-serif'
+        }}>
+          {titleConfig.org1} <span className="text-emerald-400">{titleConfig.org2}</span> <br className="md:hidden" /> {titleConfig.subtitle}
+        </h1>
+      </div>
+      
+      {/* 5. 통계(OVERALL, 완료/진행/대기) 1-Line 테이블 형태 */}
+      <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-6 scale-90 md:scale-100 w-full max-w-4xl">
+        <div className="flex items-center justify-center gap-4 bg-emerald-900/40 border border-emerald-500/50 rounded-xl px-6 py-3 shadow-[0_0_20px_rgba(52,211,153,0.2)]">
+          <div className="text-[10px] md:text-sm text-emerald-400/80 uppercase tracking-[0.2em] font-black">Overall Progress</div>
+          <div className="text-2xl md:text-3xl font-black text-emerald-400 drop-shadow-[0_0_15px_rgba(52,211,153,0.5)] leading-none">{stats.overall}%</div>
         </div>
-        <div className="w-px h-6 md:h-10 bg-white/10" />
-        <div className="flex gap-4 md:gap-8">
-          <StatMini label="완료" value={stats.done} color="#34D399" size="text-lg md:text-2xl" />
-          <StatMini label="진행" value={stats.prog} color="#FBBF24" size="text-lg md:text-2xl" />
-          <StatMini label="대기" value={stats.wait} color="#64748B" size="text-lg md:text-2xl" />
+        
+        <div className="flex bg-white/5 border border-white/10 rounded-xl backdrop-blur-sm shadow-lg overflow-hidden">
+          <StatTableRow label="완료" value={stats.done} color="#34D399" />
+          <div className="w-px bg-white/10" />
+          <StatTableRow label="진행" value={stats.prog} color="#FBBF24" />
+          <div className="w-px bg-white/10" />
+          <StatTableRow label="대기" value={stats.wait} color="#64748B" />
         </div>
       </div>
     </header>
   );
 }
 
-function StatMini({ label, value, color, size = "text-2xl" }) {
+function StatTableRow({ label, value, color }) {
   return (
-    <div className="text-center">
-      <div className="text-sm text-white/50 mb-2 tracking-[0.3em] font-black">{label}</div>
-      <div className={`${size} font-black drop-shadow-md`} style={{ color }}>{value}</div>
+    <div className="flex items-center gap-3 px-4 md:px-8 py-2 md:py-3 transition-all" style={{ boxShadow: `inset 0 0 20px ${color}05` }}>
+      <div className="text-[10px] md:text-sm text-white/50 tracking-[0.2em] font-black uppercase">{label}</div>
+      <div className="text-2xl md:text-3xl font-black drop-shadow-md leading-none" style={{ color }}>{value}</div>
     </div>
   );
 }
@@ -224,32 +247,32 @@ function DataMigrationVisual({ tasks, flowingTasks, tick, overall }) {
   
   React.useEffect(() => {
     if (overall === 100) {
-      const duration = 3000;
-      const end = Date.now() + duration;
+      // 리얼한 웅장한 폭죽(Confetti) 연출
+      const duration = 15 * 1000;
+      const animationEnd = Date.now() + duration;
+      const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 100 };
+      
+      const randomInRange = (min, max) => Math.random() * (max - min) + min;
 
-      const frame = () => {
-        confetti({
-          particleCount: 5,
-          angle: 60,
-          spread: 55,
-          origin: { x: 0, y: 0.8 },
-          colors: ['#34D399', '#A78BFA', '#22D3EE'],
-          zIndex: 100
-        });
-        confetti({
-          particleCount: 5,
-          angle: 120,
-          spread: 55,
-          origin: { x: 1, y: 0.8 },
-          colors: ['#34D399', '#A78BFA', '#22D3EE'],
-          zIndex: 100
-        });
-
-        if (Date.now() < end) {
-          requestAnimationFrame(frame);
+      const interval = setInterval(() => {
+        const timeLeft = animationEnd - Date.now();
+        if (timeLeft <= 0) {
+          return clearInterval(interval);
         }
-      };
-      frame();
+        const particleCount = 50 * (timeLeft / duration);
+        // 왼쪽에서 터짐
+        confetti(Object.assign({}, defaults, { 
+          particleCount, 
+          origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } 
+        }));
+        // 오른쪽에서 터짐
+        confetti(Object.assign({}, defaults, { 
+          particleCount, 
+          origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } 
+        }));
+      }, 250);
+      
+      return () => clearInterval(interval);
     }
   }, [overall]);
 
@@ -260,50 +283,132 @@ function DataMigrationVisual({ tasks, flowingTasks, tick, overall }) {
   }, []);
 
   const endX = isMobile ? 1000 : 1200;
-  const labelX = endX - 50;
+
+  // 완료된 타스크 추적 (종이비행기 애니메이션용)
+  const [completedAnims, setCompletedAnims] = React.useState([]);
+  const prevTasksRef = useRef(tasks);
+
+  React.useEffect(() => {
+    const prevTasks = prevTasksRef.current;
+    const prevFlowing = prevTasks.filter(p => p.status === 'progress').sort((a, b) => Number(a.id) - Number(b.id));
+    
+    const newCompleted = [];
+    tasks.forEach(t => {
+      const prev = prevTasks.find(p => p.id === t.id);
+      if (prev && prev.status === 'progress' && t.status === 'done') {
+        const index = prevFlowing.findIndex(p => p.id === t.id);
+        newCompleted.push({ ...t, animId: Date.now() + Math.random(), index: index >= 0 ? index : 0 });
+      }
+    });
+
+    if (newCompleted.length > 0) {
+      setCompletedAnims(prev => [...prev, ...newCompleted]);
+      // 서서히 이동하며 사라지도록 3초 후 제거
+      setTimeout(() => {
+        setCompletedAnims(prev => prev.filter(c => !newCompleted.find(n => n.id === c.id)));
+      }, 3000);
+    }
+    prevTasksRef.current = tasks;
+  }, [tasks]);
+
+  // 컨셉 2: 글래스모피즘 기반의 부드러운 광섬유(파이프라인) 데이터 스트림
+  const packets = React.useMemo(() => {
+    const numLanes = 10; // 파이프라인 10개로 증가
+    const numPackets = 80; // 빛 구슬 개수 2배 증가
+    return Array.from({ length: numPackets }).map((_, i) => {
+      const lane = i % numLanes;
+      const yBase = 25 + (lane * (50 / (numLanes - 1))); // 25% ~ 75% 구간에 균일 배치
+      
+      return {
+        id: i,
+        yBase,
+        delay: - (i * (20 / numPackets)) - Math.random(), // 균일한 간격 배치로 끊김 방지
+        duration: 4 + Math.random() * 2, // 4~6초 사이로 속도 편차 축소 (안정적인 흐름)
+        size: Math.random() > 0.5 ? 6 : 10,
+        color: ['#34D399', '#22D3EE', '#818CF8', '#A78BFA'][Math.floor(Math.random() * 4)],
+      };
+    });
+  }, []);
+
+  const asisOpacity = Math.max(0.1, 1 - (overall / 100));
+  const tobeOpacity = Math.max(0.1, (overall / 100));
+  const isMigrating = overall < 100;
 
   return (
-    <div className="relative h-[240px] md:h-[480px] w-full overflow-hidden flex justify-center">
+    <div className="relative h-[300px] md:h-[55vh] md:min-h-[500px] md:max-h-[600px] w-full overflow-hidden flex justify-center bg-white/[0.03] border border-white/10 rounded-[2rem] shadow-[inset_0_0_50px_rgba(255,255,255,0.02)]">
+      
+      {/* 블랙홀 중력장 배경 이펙트 */}
+      <div className="absolute right-0 top-1/2 -translate-y-1/2 w-96 h-96 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none" />
 
-      {/* 미래형 네온 비주얼 배경 */}
-      <div className="absolute inset-0 z-10 pointer-events-none flex justify-center">
-        <svg className="w-full h-full max-w-[1600px]" viewBox="0 0 1600 480" preserveAspectRatio="xMidYMin meet">
-          <defs>
-            <linearGradient id="neonGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#A78BFA" stopOpacity="0" />
-              <stop offset="50%" stopColor="#22D3EE" stopOpacity="0.1" />
-              <stop offset="100%" stopColor="#34D399" stopOpacity="1" />
-            </linearGradient>
-            <marker id="arrow" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-              <path d="M 0 0 L 10 5 L 0 10 z" fill="#34D399" />
-            </marker>
-          </defs>
-          {Array.from({ length: 60 }).map((_, i) => {
-            const yStart = 20 + i * 8;
-            const yEnd = 240 + (i - 30) * 4.5;
-            // 디바이스에 따른 동적 종착지 적용
-            const path = `M 50,${yStart} C 500,${yStart} 300,${yEnd} ${endX},${yEnd}`;
-            return (
-              <React.Fragment key={i}>
-                <path d={path} stroke="url(#neonGrad)" strokeWidth={2.5 + (i % 3) * 1.5} fill="none" opacity={0.3 + (i % 5) * 0.1} markerEnd="url(#arrow)" style={{ filter: 'drop-shadow(0 0 35px rgba(52,211,153,0.8))' }} />
-                {overall < 100 && (
-                  <>
-                    <NeonPhoton key={`p1-${i}`} i={i} pIdx={0} tick={tick} endX={endX} />
-                    <NeonPhoton key={`p2-${i}`} i={i} pIdx={1} tick={tick} endX={endX} />
-                    <NeonPhoton key={`p3-${i}`} i={i} pIdx={2} tick={tick} endX={endX} />
-                  </>
-                )}
-              </React.Fragment>
-            );
-          })}
-        </svg>
-
-        {/* 플로팅 태스크 - 동적 좌표 적용 */}
-        <div className="absolute inset-0 max-w-[1600px] mx-auto">
-          {flowingTasks.slice(0, 4).map((t, i) => (
-            <FloatingTaskLabel key={t.id} task={t} index={i} tick={tick} labelX={labelX} isMobile={isMobile} />
-          ))}
+      {/* 마이그레이션 이펙트 레이어 */}
+      <div className="absolute inset-0 z-10 pointer-events-none flex items-center justify-between px-[60px] md:px-[300px]">
+        {/* AS-IS 시스템 (데이터의 발원지) */}
+        <div className="relative flex flex-col items-center justify-center transition-all duration-1000 z-20" style={{ opacity: asisOpacity, filter: `blur(${overall/20}px)` }}>
+          <div className="w-10 h-28 md:w-20 md:h-56 border border-white/10 bg-slate-900/90 rounded-l-2xl shadow-[0_0_30px_rgba(255,255,255,0.05)] flex flex-col items-center justify-evenly p-2 relative overflow-hidden">
+             <div className="w-full h-full absolute right-0 bg-gradient-to-l from-white/5 to-transparent" />
+          </div>
+          <div className="mt-2 md:mt-4 text-[8px] md:text-xs font-black text-white/30 tracking-widest">AS-IS</div>
         </div>
+
+        {/* 데이터 흐름 (Concept 2: Glassmorphism Pipelines) */}
+        <div 
+          className="absolute top-0 bottom-0 overflow-hidden pointer-events-none z-10"
+          style={{ 
+            left: isMobile ? '134px' : '476px', 
+            right: isMobile ? '134px' : '476px',
+            containerType: 'inline-size' 
+          }}
+        >
+          {isMigrating && (
+            <>
+              {/* 반투명 유리 트랙 (가이드라인) - 10개 */}
+              {Array.from({ length: 10 }).map((_, lane) => (
+                <div key={`lane-${lane}`} className="absolute left-0 right-0 h-px bg-gradient-to-r from-white/0 via-white/10 to-white/0" style={{ top: `${25 + (lane * (50 / 9))}%` }} />
+              ))}
+              
+              {/* 빛 구슬 (데이터 패킷) */}
+              {packets.map(p => (
+                <div key={p.id} className="absolute rounded-full" style={{
+                  top: `calc(${p.yBase}% - ${p.size / 2}px)`,
+                  backgroundColor: p.color,
+                  boxShadow: `0 0 ${p.size * 2}px ${p.color}`,
+                  width: `${p.size}px`, height: `${p.size}px`,
+                  animation: `glassFlow ${p.duration}s ${p.delay}s linear infinite`,
+                  opacity: 0,
+                }}>
+                  {/* 코어 글로우 효과 */}
+                  <div className="absolute inset-1 bg-white rounded-full opacity-80" />
+                </div>
+              ))}
+            </>
+          )}
+        </div>
+
+        {/* TO-BE 시스템 (블랙홀 / 응집점) */}
+        <div className="relative flex flex-col items-center justify-center transition-all duration-1000 z-20" style={{ opacity: Math.max(0.3, tobeOpacity) }}>
+          <div className="relative flex items-center justify-center w-24 h-24 md:w-48 md:h-48">
+            {/* 블랙홀 이벤트 호라이즌(Event Horizon) 회전 효과 */}
+            <div className={`absolute inset-0 rounded-full border-t-2 border-r-2 border-emerald-400/40 shadow-[0_0_50px_rgba(52,211,153,0.3)] ${isMigrating ? 'animate-spin' : ''}`} style={{ animationDuration: '3s' }} />
+            <div className={`absolute inset-2 rounded-full border-b-2 border-l-2 border-cyan-400/40 shadow-[0_0_30px_rgba(34,211,238,0.2)] ${isMigrating ? 'animate-spin' : ''}`} style={{ animationDuration: '2s', animationDirection: 'reverse' }} />
+            
+            {/* 코어 (블랙홀 중심점) */}
+            <div className="w-8 h-8 md:w-16 md:h-16 bg-black rounded-full border border-emerald-500/50 flex items-center justify-center shadow-[0_0_40px_rgba(52,211,153,0.8)_inset,0_0_40px_rgba(52,211,153,0.5)] relative">
+               <div className="absolute text-[5px] md:text-[8px] font-black text-emerald-300 tracking-widest drop-shadow-[0_0_5px_rgba(0,0,0,1)] text-center leading-tight z-10 bg-black/60 px-1 py-0.5 rounded-full whitespace-nowrap">TO-BE<br/>CORE</div>
+               <div className="w-2 h-2 md:w-4 md:h-4 bg-white rounded-full animate-pulse shadow-[0_0_20px_white]" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* 플로팅 태스크 - 순서대로 정렬 */}
+      <div className="absolute inset-0 w-full z-30 pointer-events-none">
+        {flowingTasks.map((t, i) => (
+          <FloatingTaskLabel key={t.id} task={t} index={i} tick={tick} isMobile={isMobile} />
+        ))}
+        {/* 완료 시 종이비행기 날아가는 이펙트 */}
+        {completedAnims.map(c => (
+          <PaperPlaneAnim key={c.animId} task={c} index={c.index} isMobile={isMobile} />
+        ))}
       </div>
 
       {/* 100% 달성 시 축하 오버레이 */}
@@ -318,57 +423,91 @@ function DataMigrationVisual({ tasks, flowingTasks, tick, overall }) {
         </div>
       )}
 
-      {/* 태스크 그리드 (좌우 대칭 배치) */}
-      <div className="absolute left-1 md:left-4 top-0 bottom-2 w-[110px] md:w-[430px] grid grid-cols-1 md:grid-cols-3 gap-0.5 md:gap-1 content-start overflow-y-auto no-scrollbar z-20">
-        {tasks.map((t, i) => <ServerNode key={'asis-'+t.id} task={t} mode="asis" index={i} />)}
+      {/* 태스크 그리드 (스크롤바 표시 및 10% 축소) */}
+      <div className="absolute left-1 md:left-4 top-0 bottom-2 w-[130px] md:w-[460px] flex flex-col overflow-y-auto custom-scrollbar pr-1 md:pr-2 z-20">
+        <div className="flex-grow shrink-0" />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-0.5 md:gap-1.5 w-full shrink-0 py-2">
+          {tasks.map((t, i) => <ServerNode key={'asis-'+t.id} task={t} mode="asis" index={i} />)}
+        </div>
+        <div className="flex-grow shrink-0" />
       </div>
-      <div className="absolute right-1 md:right-4 top-0 bottom-2 w-[110px] md:w-[430px] grid grid-cols-1 md:grid-cols-3 gap-0.5 md:gap-1 content-start overflow-y-auto no-scrollbar z-20">
-        {tasks.map((t, i) => <ServerNode key={'tobe-'+t.id} task={t} mode="tobe" index={i} />)}
+      <div className="absolute right-1 md:right-4 top-0 bottom-2 w-[130px] md:w-[460px] flex flex-col overflow-y-auto custom-scrollbar pr-1 md:pr-2 z-20">
+        <div className="flex-grow shrink-0" />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-0.5 md:gap-1.5 w-full shrink-0 py-2">
+          {tasks.map((t, i) => <ServerNode key={'tobe-'+t.id} task={t} mode="tobe" index={i} />)}
+        </div>
+        <div className="flex-grow shrink-0" />
       </div>
     </div>
   );
 }
 
-function NeonPhoton({ i, pIdx, tick, endX }) {
-  const progress = ((tick * (0.9 + i * 0.03) + pIdx * 33) % 100) / 100;
-  // 디바이스별 endX에 맞춰 동적 재계산
-  const x = 50 + (endX - 50) * progress;
-  const t = progress;
-  const yStart = 20 + i * 8;
-  const yEnd = 240 + (i - 30) * 4.5;
+function FloatingTaskLabel({ task, index, tick, isMobile }) {
+  // 절대 겹치지 않는 3x4(최대 12개) 그리드(격자) 시스템 도입
+  const riverRight = isMobile ? 900 : 1050; 
+  const riverLeft = isMobile ? 700 : 600;   
   
-  // 광원띠가 화살표 라인(S-곡선)을 완벽히 따라 흐르도록 복구
-  const cp1y = yStart;
-  const cp2y = yEnd;
-  const y = Math.pow(1-t, 3)*yStart + 3*Math.pow(1-t, 2)*t*cp1y + 3*(1-t)*Math.pow(t, 2)*cp2y + Math.pow(t, 3)*yEnd;
-
-  const intensity = Math.pow(progress, 5) * 3.5 + 0.05;
-
+  // 기존 대비 크기를 20% 줄여(scale 0.8) 더 많은 슬롯 확보 (4x5 = 20개 슬롯)
+  const cols = 4;
+  const rows = 5;
+  const xStep = (riverRight - riverLeft) / (cols - 1); 
+  const yStep = (380 - 100) / (rows - 1); 
+  
+  const slot = index % (cols * rows);
+  const c = Math.floor(slot / rows); // 0(우), 1(중), 2(좌)
+  const r = slot % rows; // 0(상) ~ 3(하)
+  
+  const xCenter = riverRight - (c * xStep);
+  const yBase = 100 + (r * yStep);
+  
+  // 상하좌우 부유(Wobble) 반경을 그리드 간격보다 훨씬 작게 설정하여 절대 겹치지 않게 보장
+  const x = xCenter + (Math.sin(tick * 0.02 + index) * 20); 
+  const y = yBase + (Math.cos(tick * 0.02 + index) * 15); 
+  
   return (
-    <circle cx={x} cy={y} r={2 + intensity * 5} fill={i % 2 === 0 ? '#A78BFA' : '#22D3EE'} style={{
-      filter: `drop-shadow(0 0 ${intensity * 45}px ${i % 2 === 0 ? '#A78BFA' : '#22D3EE'})`,
-      opacity: intensity
-    }} />
-  );
-}
-
-function FloatingTaskLabel({ task, index, tick, labelX, isMobile }) {
-  const yBase = 240 + (index % 3 - 1) * 120; 
-  // 디바이스별 labelX에 맞춰 동적 재배치
-  const x = labelX + (Math.sin(tick * 0.02 + index) * 40); 
-  const y = yBase + (Math.cos(tick * 0.02 + index) * 30); 
-  return (
-    <div className="absolute px-3 md:px-6 py-1 md:py-2 rounded-full border-2 border-emerald-400/80 bg-black/95 backdrop-blur-3xl shadow-[0_0_50px_rgba(52,211,153,0.6)] flex items-center gap-2 md:gap-4 transition-all duration-1000 z-50 whitespace-nowrap origin-center"
+    <div className="absolute px-3 md:px-6 py-1 md:py-2 rounded-full border-2 border-emerald-400/80 bg-black/95 backdrop-blur-3xl shadow-[0_0_50px_rgba(52,211,153,0.6)] flex items-center gap-2 md:gap-4 transition-all duration-1000 whitespace-nowrap origin-center"
       style={{ 
         left: `${(x / 1600) * 100}%`, 
         top: `${(y / 480) * 100}%`,
-        transform: `translate(-50%, -50%) scale(${isMobile ? 0.6 : 1})`
+        transform: `translate(-50%, -50%) scale(${isMobile ? 0.48 : 0.8})`, // 20% 축소
+        zIndex: 100 - index // 먼저 진행된 타스크(index가 낮을수록)가 겹칠 때 항상 위로 오게 함
       }}>
       <div className="w-2 h-2 md:w-3 md:h-3 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_15px_rgba(52,211,153,1)]" />
       <div className="flex flex-col">
         <span className="text-[8px] md:text-xs font-black text-emerald-400/70 tracking-tighter uppercase leading-none mb-0.5 md:mb-1">진행중 작업번호</span>
         <span className="text-sm md:text-xl font-black text-white tracking-tighter drop-shadow-md leading-none">#{task.id}</span>
       </div>
+    </div>
+  );
+}
+
+function PaperPlaneAnim({ task, index, isMobile }) {
+  const riverRight = isMobile ? 900 : 1050;
+  const riverLeft = isMobile ? 700 : 600;
+  
+  const cols = 4;
+  const rows = 5;
+  const xStep = (riverRight - riverLeft) / (cols - 1);
+  const yStep = (380 - 100) / (rows - 1);
+  
+  const slot = index % (cols * rows);
+  const c = Math.floor(slot / rows);
+  const r = slot % rows;
+  
+  const xStart = riverRight - (c * xStep);
+  const yStart = 100 + (r * yStep);
+
+  return (
+    <div className="absolute px-6 py-2 rounded-full border-2 flex items-center gap-3 whitespace-nowrap origin-center animate-paperPlaneFly"
+      style={{ 
+        left: `${(xStart / 1600) * 100}%`, 
+        top: `${(yStart / 480) * 100}%`,
+        '--planeScale': isMobile ? 0.48 : 0.8,
+        '--destX': isMobile ? 'calc(100% - 60px)' : 'calc(100% - 300px)',
+        zIndex: 100 - index
+      }}>
+      <Send className="w-5 h-5 plane-icon" />
+      <span className="text-xl font-black tracking-tighter drop-shadow-md leading-none plane-text">#{task.id} 완료!</span>
     </div>
   );
 }
@@ -384,18 +523,24 @@ function ServerNode({ task, mode, index }) {
   const isDoneTobe = !isAsIs && done;
 
   return (
-    <div className={`p-1 md:p-2 rounded md:rounded-lg border transition-all duration-500 ${blinking ? 'node-blink' : ''}`}
+    <div 
+      className={`px-1 py-0.5 md:px-1.5 md:py-1 rounded border transition-all duration-500 flex items-center gap-1 md:gap-1.5 ${blinking ? 'node-blink' : ''}`}
+      title={task.name}
       style={{
         background: isDoneTobe ? 'rgba(59, 130, 246, 0.5)' : deactivated ? 'rgba(15,23,42,0.6)' : active ? `${g.color}15` : 'rgba(15,23,42,0.8)',
         borderColor: isDoneTobe ? '#3B82F6' : deactivated ? 'rgba(255,255,255,0.05)' : blinking ? '#FBBF24' : `${g.color}40`,
         opacity: deactivated ? 0.4 : 1,
         boxShadow: isDoneTobe ? '0 0 15px rgba(59, 130, 246, 0.3)' : 'none'
       }}>
-      <div className="flex justify-between items-center mb-0.5 md:mb-1">
-        <span className="text-[7px] md:text-[9px] font-mono" style={{ color: deactivated ? '#444' : g.color }}>{task.id}</span>
-        {blinking && <div className="w-1 h-1 md:w-1.5 md:h-1.5 rounded-full bg-white animate-ping" />}
-      </div>
-      <div className="text-[8px] md:text-[10px] font-bold truncate leading-tight">{task.name.replace(/^\d+\.\d+\s*/, '')}</div>
+      <span className="text-[9px] md:text-[11px] font-black shrink-0" style={{ color: deactivated ? '#444' : g.color }}>
+        #{task.id}
+      </span>
+      {/* 타스크 명 (크기 2단계 업, 넘치면 ...) */}
+      <span className="text-[9px] md:text-[11px] font-bold truncate flex-1 leading-none text-white/90">
+        {task.name.replace(/^\d+\.\d+\s*/, '')}
+      </span>
+      {/* 깜빡임 인디케이터 (크기 업) */}
+      {blinking && <div className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-white animate-ping shrink-0" />}
     </div>
   );
 }
@@ -436,20 +581,22 @@ function CapsuleGauges({ tasks }) {
   }, [tasks]);
 
   return (
-    <div className="mt-8 px-8">
-      <div className="text-center text-sm font-black tracking-[0.8em] text-white/50 mb-6 uppercase">6단계 공정별 마이그레이션 진척</div>
-      <div className="grid grid-cols-6 gap-4">
+    <div className="mt-4 px-4">
+      {/* 6. 폰트 2배 증가 (text-xs -> text-xl md:text-2xl) */}
+      <div className="text-center text-xl md:text-2xl font-black tracking-[0.6em] text-white/50 mb-6 uppercase">6단계 공정별 마이그레이션 진척</div>
+      <div className="grid grid-cols-6 gap-2 md:gap-4">
         {Object.entries(TASK_GROUPS).map(([key, g]) => {
           const d = byGroup[key];
           return (
-            <div key={key} className="p-4 rounded-[2rem] bg-white/5 border border-white/10 text-center backdrop-blur-xl relative overflow-hidden">
-              <div className="flex flex-col gap-1 mb-3">
-                <span className="text-[11px] font-black uppercase tracking-widest opacity-60" style={{ color: g.color }}>{g.label}</span>
-                <span className="text-2xl font-black tabular-nums" style={{ color: g.color }}>{d.pct}%</span>
+            <div key={key} className="px-3 py-2 md:px-4 md:py-3 rounded-[1rem] bg-white/5 border border-white/10 flex flex-col justify-center backdrop-blur-xl relative overflow-hidden">
+              <div className="flex items-center justify-center gap-2 mb-2 w-full truncate">
+                <span className="text-[10px] md:text-[13px] font-black uppercase tracking-wider opacity-80" style={{ color: g.color }}>{key}. {g.label}</span>
+                <span className="text-[10px] md:text-[13px] font-black text-white/40">:</span>
+                <span className="text-sm md:text-lg font-black tabular-nums" style={{ color: g.color }}>{d.pct}%</span>
               </div>
-              <div className="h-6 rounded-full bg-black/40 border border-white/5 overflow-hidden p-1">
+              <div className="h-2 md:h-2.5 w-full rounded-full bg-black/40 border border-white/5 overflow-hidden">
                 <div className="h-full rounded-full transition-all duration-1000" style={{
-                  width: `${d.pct}%`, background: `linear-gradient(90deg, ${g.color}60, ${g.color})`, boxShadow: `0 0 20px ${g.color}40`
+                  width: `${d.pct}%`, background: `linear-gradient(90deg, ${g.color}60, ${g.color})`, boxShadow: `0 0 15px ${g.color}60`
                 }} />
               </div>
             </div>
@@ -460,41 +607,139 @@ function CapsuleGauges({ tasks }) {
   );
 }
 
-function DnsPanel({ dnsTask, dnsReady, urlTasks, verifiedUrls, onUrlClick }) {
+function SyncPanel({ dnsTask, dnsReady, urlTasks, verifiedUrls, onUrlClick, sheetUrl, setSheetUrl, lastSync, connStatus, onSettingsClick }) {
+  const isOk = connStatus === 'connected';
   return (
-    <div className="mt-4 md:mt-6 mx-2 md:mx-32 p-3 rounded-2xl bg-white/5 border border-white/10 flex flex-col md:flex-row items-center justify-between gap-4 md:gap-8 backdrop-blur-md">
-      <div className="flex items-center gap-4 px-2 md:pl-6">
-        <div className={`p-2 rounded-lg ${dnsReady ? 'bg-emerald-500/20' : 'bg-white/5'}`}>
-          <Globe className={`w-4 h-4 md:w-5 md:h-5 ${dnsReady ? 'text-emerald-400' : 'text-white/20'}`} />
+    <div className="mt-4 md:mt-6 w-full p-3 md:p-4 rounded-[1.5rem] bg-white/5 border border-white/10 flex flex-col gap-3 backdrop-blur-md shadow-2xl relative">
+      
+      {/* 파이프라인 및 시트 URL 입력 */}
+      <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+        
+        {/* 파이프라인 시각화 */}
+        <div className="flex items-center gap-2 md:gap-4 bg-black/40 px-4 py-2 rounded-full border border-white/10 flex-shrink-0">
+          <PipelineNode label="Google Sheet" icon={<Cloud className="w-3 h-3" />} active={isOk} />
+          <ArrowRight className={`w-3 h-3 ${isOk ? 'text-emerald-400' : 'text-slate-600'}`} />
+          <PipelineNode label="Github" icon={<Server className="w-3 h-3" />} active={isOk} />
+          <ArrowRight className={`w-3 h-3 ${isOk ? 'text-emerald-400' : 'text-slate-600'}`} />
+          <PipelineNode label="Vercel" icon={<Globe className="w-3 h-3" />} active={isOk} />
+          
+          <button 
+            onClick={onSettingsClick} 
+            className="ml-1 md:ml-2 w-7 h-7 md:w-8 md:h-8 rounded-full bg-slate-800 border border-slate-600 flex items-center justify-center hover:bg-emerald-900/50 hover:border-emerald-500 hover:text-emerald-400 transition-colors group"
+            title="타이틀 관리 설정"
+          >
+            <Settings className="w-3 h-3 md:w-4 md:h-4 text-slate-400 group-hover:text-emerald-400 group-hover:animate-spin" style={{ animationDuration: '3s' }} />
+          </button>
         </div>
-        <div>
-          <div className="text-[8px] md:text-[10px] font-black tracking-widest text-white/40 uppercase mb-0.5">DNS CUTOVER</div>
-          <div className="text-[10px] md:text-xs font-bold text-white/80">사용자 서비스 최종 검증</div>
+
+        {/* URL 정보 영역 */}
+        <div className="flex flex-col gap-1.5 w-full">
+          <div className="flex items-center w-full bg-black/40 border border-white/10 rounded-full px-4 py-1.5">
+            <span className="text-[10px] md:text-xs font-black text-white/40 mr-3 w-16">SHEET</span>
+            <input 
+              type="text" 
+              value={sheetUrl} 
+              onChange={e => setSheetUrl(e.target.value)}
+              className="bg-transparent w-full outline-none text-[10px] md:text-xs text-emerald-400/80 font-mono"
+              placeholder="Google Sheet API URL 입력..."
+            />
+            <div className={`w-2 h-2 rounded-full shrink-0 ml-3 ${isOk ? 'bg-emerald-400 shadow-[0_0_10px_#34D399]' : 'bg-rose-500 shadow-[0_0_10px_#f43f5e]'}`} />
+          </div>
+          
+          <div className="flex flex-col md:flex-row gap-1.5">
+            <div className="flex items-center w-full bg-black/40 border border-white/10 rounded-full px-4 py-1.5">
+              <span className="text-[10px] md:text-xs font-black text-white/40 mr-3 w-16">GITHUB</span>
+              <span className="text-[9px] md:text-[11px] text-white/60 font-mono truncate">github.com/your-repo/pyhgoshift</span>
+            </div>
+            <div className="flex items-center w-full bg-black/40 border border-white/10 rounded-full px-4 py-1.5">
+              <span className="text-[10px] md:text-xs font-black text-white/40 mr-3 w-16">VERCEL</span>
+              <span className="text-[9px] md:text-[11px] text-white/60 font-mono truncate">pyhgoshift-mg.vercel.app</span>
+            </div>
+          </div>
+          
+          {lastSync && (
+            <div className="text-[10px] font-mono text-white/40 tracking-widest px-2 text-right mt-1">
+              Last Deployed: {lastSync.toLocaleString('ko-KR')} (Vercel)
+            </div>
+          )}
         </div>
       </div>
-      <div className="flex flex-wrap justify-center gap-2 px-2 md:pr-6">
-        {urlTasks.map(t => {
-          const ok = verifiedUrls.has(t.id) || t.status === 'done';
-          return (
-            <button key={t.id} disabled={!dnsReady || ok} onClick={() => onUrlClick(t.id)}
-              className={`px-3 md:px-5 py-1.5 md:py-2 rounded-lg md:rounded-xl text-[8px] md:text-[10px] font-black transition-all border ${ok ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-400 shadow-[0_0_15px_rgba(52,211,153,0.2)]' : 'bg-slate-800/40 border-white/5 text-white/20'}`}>
-              {t.name.split(' ')[0]} {ok ? 'OK' : 'WAIT'}
-            </button>
-          );
-        })}
+
+    </div>
+  );
+}
+
+function PipelineNode({ label, icon, active }) {
+  return (
+    <div className="flex items-center gap-2">
+      <div className={`flex items-center justify-center w-6 h-6 rounded-full border ${active ? 'bg-emerald-500/20 border-emerald-400 text-emerald-400 shadow-[0_0_15px_rgba(52,211,153,0.4)]' : 'bg-slate-800 border-slate-600 text-slate-500'}`}>
+        {icon}
+      </div>
+      <span className={`text-[9px] md:text-[11px] font-black uppercase tracking-widest ${active ? 'text-emerald-400' : 'text-slate-500'}`}>{label}</span>
+    </div>
+  );
+}
+
+function CelebrationOverlay({ onClose, titleConfig }) {
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-2xl">
+      <div className="text-center animate-in zoom-in duration-500">
+        <PartyPopper className="w-24 h-24 text-emerald-400 mx-auto mb-6 animate-bounce" />
+        <h1 className="text-6xl md:text-8xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-200 via-emerald-400 to-emerald-200 drop-shadow-[0_0_30px_rgba(52,211,153,0.8)] mb-4">MIGRATION SUCCESS</h1>
+        <p className="text-xl md:text-2xl text-white/60 mb-12">{titleConfig.org1} {titleConfig.org2} {titleConfig.subtitle} 시스템 이전이 완료되었습니다.</p>
+        <button onClick={onClose} className="px-12 py-4 rounded-full bg-emerald-500 text-black font-black text-xl hover:scale-110 shadow-[0_0_20px_rgba(52,211,153,0.6)] transition-all">확인</button>
       </div>
     </div>
   );
 }
 
-function CelebrationOverlay({ onClose }) {
+function SettingsModal({ titleConfig, setTitleConfig, onClose }) {
+  const [local, setLocal] = React.useState(titleConfig);
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-2xl">
-      <div className="text-center">
-        <PartyPopper className="w-24 h-24 text-emerald-400 mx-auto mb-6 animate-bounce" />
-        <h1 className="text-8xl font-black text-white mb-4">MIGRATION SUCCESS</h1>
-        <p className="text-2xl text-white/60 mb-12">경기도교육청 중앙도서관 시스템 이전이 완료되었습니다.</p>
-        <button onClick={onClose} className="px-12 py-4 rounded-full bg-emerald-500 text-black font-black text-xl hover:scale-110 transition-all">확인</button>
+    <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/80 backdrop-blur-sm px-4">
+      <div className="bg-[#0f172a] border border-emerald-500/30 p-6 md:p-8 rounded-[2rem] w-full max-w-md shadow-[0_0_50px_rgba(52,211,153,0.15)] animate-in slide-in-from-bottom-10 fade-in duration-300">
+        <h2 className="text-2xl font-black text-white mb-6 flex items-center gap-3">
+          <Settings className="w-6 h-6 text-emerald-400" />
+          타이틀 설정 관리
+        </h2>
+        
+        <div className="flex flex-col gap-5">
+          <div>
+            <label className="text-xs text-emerald-400/80 font-bold mb-1 block uppercase tracking-widest">상위 기관명</label>
+            <input 
+              type="text" 
+              value={local.org1} 
+              onChange={e => setLocal({...local, org1: e.target.value})} 
+              className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none focus:border-emerald-500 focus:bg-emerald-900/10 transition-colors" 
+              placeholder="예: 경기도교육청"
+            />
+          </div>
+          <div>
+            <label className="text-xs text-emerald-400/80 font-bold mb-1 block uppercase tracking-widest">하위 기관명/목표</label>
+            <input 
+              type="text" 
+              value={local.org2} 
+              onChange={e => setLocal({...local, org2: e.target.value})} 
+              className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none focus:border-emerald-500 focus:bg-emerald-900/10 transition-colors" 
+              placeholder="예: 중앙도서관"
+            />
+          </div>
+          <div>
+            <label className="text-xs text-emerald-400/80 font-bold mb-1 block uppercase tracking-widest">서브타이틀</label>
+            <input 
+              type="text" 
+              value={local.subtitle} 
+              onChange={e => setLocal({...local, subtitle: e.target.value})} 
+              className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none focus:border-emerald-500 focus:bg-emerald-900/10 transition-colors" 
+              placeholder="예: 이전통합 모니터링 (V.3.0)"
+            />
+          </div>
+        </div>
+        
+        <div className="mt-8 flex justify-end gap-3">
+          <button onClick={onClose} className="px-6 py-2.5 rounded-full bg-white/5 border border-white/10 text-white/70 hover:bg-white/10 hover:text-white font-bold transition-colors">취소</button>
+          <button onClick={() => { setTitleConfig(local); onClose(); }} className="px-6 py-2.5 rounded-full bg-emerald-500 text-black font-black hover:bg-emerald-400 hover:scale-105 shadow-[0_0_15px_rgba(52,211,153,0.4)] transition-all">설정 저장</button>
+        </div>
       </div>
     </div>
   );
@@ -510,6 +755,35 @@ function Styles() {
       @keyframes titleShine { 0% { background-position: 0% center; } 100% { background-position: 200% center; } }
       @keyframes binaryFall { 0% { transform: translateY(0); } 100% { transform: translateY(120vh); } }
       @keyframes nodeBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+      @keyframes glassFlow {
+        0% { transform: translateX(0cqw) scale(0.5); opacity: 0; }
+        5% { opacity: 1; transform: translateX(5cqw) scale(1); }
+        95% { opacity: 1; transform: translateX(95cqw) scale(1); }
+        100% { transform: translateX(100cqw) scale(0.5); opacity: 0; }
+      }
+      @keyframes paperPlaneFly {
+        0% { transform: translate(-50%, -50%) scale(var(--planeScale, 0.8)); opacity: 1; }
+        20% { transform: translate(calc(-50% - 30px), calc(-50% - 50px)) scale(calc(var(--planeScale, 0.8) * 1.05)) rotate(5deg); opacity: 1; }
+        100% { 
+          left: var(--destX);
+          top: 50%;
+          transform: translate(-50%, -50%) scale(0.1) rotate(0deg); 
+          opacity: 0; 
+        }
+      }
+      .animate-paperPlaneFly {
+        animation: paperPlaneFly 3s ease-out forwards;
+      }
+      @keyframes planeIconAnim {
+        0%, 20% { fill: #fca5a5; color: #fca5a5; }
+        100% { fill: #9ca3af; color: #9ca3af; }
+      }
+      .plane-icon { animation: planeIconAnim 3s ease-out forwards; }
+      @keyframes planeTextAnim {
+        0%, 20% { color: #ffffff; }
+        100% { color: #9ca3af; }
+      }
+      .plane-text { animation: planeTextAnim 3s ease-out forwards; }
       .node-blink { 
         animation: nodeBlink 1.6s infinite !important;
         background: rgba(251, 191, 36, 0.4) !important;
@@ -519,8 +793,10 @@ function Styles() {
         position: relative;
       }
       .node-blink * { color: #000 !important; }
-      .no-scrollbar::-webkit-scrollbar { display: none; }
-      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+      .custom-scrollbar::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.02); border-radius: 10px; }
+      .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.15); border-radius: 10px; }
+      .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.3); }
     `}</style>
   );
 }
