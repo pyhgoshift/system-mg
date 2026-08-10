@@ -582,7 +582,6 @@ function CapsuleGauges({ tasks }) {
 
   return (
     <div className="mt-4 px-4">
-      {/* 6. 폰트 2배 증가 (text-xs -> text-xl md:text-2xl) */}
       <div className="text-center text-xl md:text-2xl font-black tracking-[0.6em] text-white/50 mb-6 uppercase">6단계 공정별 마이그레이션 진척</div>
       <div className="grid grid-cols-6 gap-2 md:gap-4">
         {Object.entries(TASK_GROUPS).map(([key, g]) => {
@@ -610,13 +609,14 @@ function CapsuleGauges({ tasks }) {
 function SyncPanel({ dnsTask, dnsReady, urlTasks, verifiedUrls, onUrlClick, sheetUrl, setSheetUrl, lastSync, connStatus, onSettingsClick }) {
   const isOk = connStatus === 'connected';
   return (
-    <div className="mt-4 md:mt-6 w-full p-3 md:p-4 rounded-[1.5rem] bg-white/5 border border-white/10 flex flex-col gap-3 backdrop-blur-md shadow-2xl relative">
-      
-      {/* 파이프라인 및 시트 URL 입력 */}
-      <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+    <div className="mt-4 md:mt-6 w-full flex flex-col gap-4">
+      <div className="w-full py-2 px-3 md:py-2 md:px-4 rounded-[1.5rem] bg-white/5 border border-white/10 flex flex-col gap-2 backdrop-blur-md shadow-2xl relative">
         
-        {/* 파이프라인 시각화 */}
-        <div className="flex items-center gap-2 md:gap-4 bg-black/40 px-4 py-2 rounded-full border border-white/10 flex-shrink-0">
+        {/* 파이프라인 및 시트 URL 입력 */}
+        <div className="flex flex-col md:flex-row items-center justify-between gap-3 relative">
+          
+          {/* 파이프라인 시각화 */}
+          <div className="flex items-center gap-2 md:gap-4 bg-black/40 px-4 py-2 rounded-full border border-white/10 flex-shrink-0 z-10">
           <PipelineNode label="Google Sheet" icon={<Cloud className="w-3 h-3" />} active={isOk} />
           <ArrowRight className={`w-3 h-3 ${isOk ? 'text-emerald-400' : 'text-slate-600'}`} />
           <PipelineNode label="Github" icon={<Server className="w-3 h-3" />} active={isOk} />
@@ -658,13 +658,22 @@ function SyncPanel({ dnsTask, dnsReady, urlTasks, verifiedUrls, onUrlClick, shee
           </div>
           
           {lastSync && (
-            <div className="text-[10px] font-mono text-white/40 tracking-widest px-2 text-right mt-1">
+            <div className="text-[9px] md:text-[10px] font-mono text-white/40 tracking-widest px-2 text-right mt-1">
               Last Deployed: {lastSync.toLocaleString('ko-KR')} (Vercel)
             </div>
           )}
         </div>
-      </div>
 
+        {/* 완벽한 정중앙 하단 로고 배치 */}
+        <div className="absolute left-1/2 -bottom-1 md:-bottom-1.5 -translate-x-1/2 pointer-events-none z-20">
+          <img 
+            src="/pyhgoshift_mg_logo.png" 
+            alt="PYHGOSHIFT" 
+            className="h-5 md:h-6 object-contain opacity-90 drop-shadow-md" 
+          />
+        </div>
+      </div>
+      </div>
     </div>
   );
 }
