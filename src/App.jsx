@@ -159,10 +159,10 @@ export default function Dashboard() {
           </div>
         </div>
         <DataMigrationVisual tasks={tasks} flowingTasks={flowingTasks} tick={tick} overall={stats.overall} />
-        <div className="hidden md:block" style={{ zoom: 0.95 }}>
+        <div className="hidden md:block scale-95 origin-top">
           <CapsuleGauges tasks={tasks} />
         </div>
-        <div className="md:hidden" style={{ zoom: 0.95 }}>
+        <div className="md:hidden scale-95 origin-top">
           <MobileGauges tasks={tasks} />
         </div>
         <SyncPanel 
